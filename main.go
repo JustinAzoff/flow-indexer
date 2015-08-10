@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"compress/gzip"
 	"fmt"
 	"github.com/justinazoff/flow-indexer/ipset"
 	"io"
@@ -27,7 +28,11 @@ func indexBroLog(store *LevelDBStore, filename string) {
 		return
 	}
 
-	reader, err := OpenDecompress(filename)
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Print(err)
+	}
+	reader, err := gzip.NewReader(f)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -74,7 +79,7 @@ func main() {
 	if isFile {
 		indexBroLog(bs, arg)
 	}
-	//bs.ListDocuments()
+	bs.ListDocuments()
 	if !isFile {
 		bs.QueryString(arg)
 	}
