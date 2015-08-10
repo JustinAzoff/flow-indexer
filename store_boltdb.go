@@ -62,7 +62,6 @@ func (bs *BoltStore) AddDocument(filename string, ips ipset.Set) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("HasDocument %s: %v\n", filename, exists)
 	if exists {
 		return nil
 	}
@@ -76,7 +75,7 @@ func (bs *BoltStore) AddDocument(filename string, ips ipset.Set) error {
 		setDocId(b, filename, nextID)
 		ipBucket := tx.Bucket([]byte("ips"))
 		for k, _ := range ips.Store {
-			fmt.Printf("Add %#v to document\n", k)
+			//fmt.Printf("Add %#v to document\n", k)
 			addIP(ipBucket, nextID, k)
 		}
 		return nil
@@ -150,14 +149,11 @@ func setDocId(b *bolt.Bucket, filename string, id uint64) error {
 func addIP(b *bolt.Bucket, id uint64, k string) {
 	v := b.Get([]byte(k))
 	bs := bitset.New(8)
-	if v == nil {
-		fmt.Printf("%#v is not in the db. Adding with %d\n", k, id)
-	} else {
+	if v != nil {
 		bs.ReadFrom(bytes.NewBuffer(v))
 	}
 	bs.Set(uint(id))
 
-	fmt.Printf("Storage size is %d\n", bs.BinaryStorageSize())
 	buffer := bytes.NewBuffer(make([]byte, 0, bs.BinaryStorageSize()))
 	_, err := bs.WriteTo(buffer)
 	if err != nil {
