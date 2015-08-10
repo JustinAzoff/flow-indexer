@@ -21,7 +21,6 @@ func NewLevelDBStore(filename string) (*LevelDBStore, error) {
 	}
 	newStore := &LevelDBStore{db: db, batch: nil}
 	return newStore, nil
-
 }
 
 func (ls *LevelDBStore) Close() error {
@@ -52,7 +51,7 @@ func (ls *LevelDBStore) AddDocument(filename string, ips ipset.Set) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("NextDocID should be %d\n", nextID)
+	fmt.Printf("NextDocID should be %d. Writing %d ips\n", nextID, len(ips.Store))
 	ls.setDocId(filename, nextID)
 	ls.batch = new(leveldb.Batch)
 	for k, _ := range ips.Store {
@@ -100,7 +99,7 @@ func (ls *LevelDBStore) QueryString(ip string) error {
 		if err != nil {
 			break
 		}
-		fmt.Printf("Match in document %d %s\n", i, name)
+		fmt.Println(name)
 	}
 	return err
 }
