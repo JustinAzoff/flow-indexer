@@ -15,7 +15,7 @@ var basicAddStringTests = []struct {
 
 func TestIpsetAdd(t *testing.T) {
 	for _, tt := range basicAddStringTests {
-		s := NewIpset()
+		s := New()
 		s.AddString(tt.in)
 		for k, _ := range s.Store {
 			if k != tt.out {

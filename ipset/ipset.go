@@ -9,23 +9,28 @@ type Set struct {
 	Store map[string]struct{}
 }
 
-func NewIpset() *Set {
+func New() *Set {
 	store := make(map[string]struct{})
 	return &Set{store}
 }
 
-func (set *Set) AddString(s string) error {
+func IPToByteString(s string) (string, error) {
 	ip := net.ParseIP(s)
 	if ip == nil {
-		return fmt.Errorf("Invalid IP Address %s", s)
+		return "", fmt.Errorf("Invalid IP Address %s", s)
 	}
 
 	if ip4 := ip.To4(); ip4 != nil {
 		ip = ip4
 	}
-	keyString := string([]byte(ip))
+	return string([]byte(ip)), nil
+}
 
+func (set *Set) AddString(s string) error {
+	keyString, err := IPToByteString(s)
+	if err != nil {
+		return err
+	}
 	set.Store[keyString] = struct{}{}
-
 	return nil
 }
