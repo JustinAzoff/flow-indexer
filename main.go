@@ -2,12 +2,13 @@ package main
 
 import (
 	"bufio"
-	"compress/gzip"
 	"fmt"
 	"github.com/justinazoff/flow-indexer/ipset"
+	gzip "github.com/klauspost/pgzip"
 	"io"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -65,8 +66,7 @@ func indexBroLog(store *LevelDBStore, filename string) {
 }
 
 func main() {
-	// Open the my.db data file in your current directory.
-	// It will be created if it doesn't exist.
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	bs, err := NewLevelDBStore("my.db")
 	check(err)
 	defer bs.Close()
