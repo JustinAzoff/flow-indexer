@@ -51,7 +51,6 @@ func (ls *LevelDBStore) AddDocument(filename string, ips ipset.Set) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("NextDocID should be %d. Writing %d ips\n", nextID, len(ips.Store))
 	ls.setDocId(filename, nextID)
 	ls.batch = new(leveldb.Batch)
 	for k, _ := range ips.Store {

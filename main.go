@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func check(err error) {
@@ -41,6 +42,7 @@ func indexBroLog(store *LevelDBStore, filename string) {
 
 	s := ipset.New()
 	lines := 0
+	start := time.Now()
 	for {
 		line, err := br.ReadString('\n')
 		if err == io.EOF {
@@ -55,32 +57,31 @@ func indexBroLog(store *LevelDBStore, filename string) {
 			s.AddString(parts[2])
 			s.AddString(parts[4])
 			lines += 1
-			if lines%1000 == 0 {
-				fmt.Printf("\rRead %d lines", lines)
-			}
 		}
 	}
-	fmt.Printf("\rRead %d lines\n", lines)
+	duration := time.Since(start)
+	fmt.Printf("%s: Read %d lines in %s\n", filename, lines, duration)
 
+	start = time.Now()
 	store.AddDocument(filename, *s)
+	duration = time.Since(start)
+	fmt.Printf("%s: Wrote %d unique ips in %s\n", filename, len(s.Store), duration)
 }
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	bs, err := NewLevelDBStore("my.db")
+	dbfile := os.Args[1]
+	bs, err := NewLevelDBStore(dbfile)
 	check(err)
 	defer bs.Close()
-
-	arg := os.Args[1]
 	isFile := true
+	arg := os.Args[2]
 	if _, err := os.Stat(arg); os.IsNotExist(err) {
 		isFile = false
 	}
 	if isFile {
 		indexBroLog(bs, arg)
-	}
-	bs.ListDocuments()
-	if !isFile {
+	} else {
 		bs.QueryString(arg)
 	}
 }
