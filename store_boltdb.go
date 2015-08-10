@@ -18,6 +18,7 @@ func NewBoltStore(filename string) (*BoltStore, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.NoSync = true
 	tx, err := db.Begin(true)
 	if err != nil {
 		return nil, err
@@ -160,10 +161,4 @@ func addIP(b *bolt.Bucket, id uint64, k string) {
 		return //nil, err
 	}
 	b.Put([]byte(k), buffer.Bytes())
-}
-
-func PutUVarint(v uint64) []byte {
-	b := make([]byte, 10)
-	binary.PutUvarint(b, uint64(v))
-	return b
 }

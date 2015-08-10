@@ -17,7 +17,7 @@ func check(err error) {
 	}
 }
 
-func indexBroLog(store *BoltStore, filename string) {
+func indexBroLog(store *LevelDBStore, filename string) {
 	exists, err := store.HasDocument(filename)
 	if err != nil {
 		fmt.Print(err)
@@ -67,7 +67,7 @@ func indexBroLog(store *BoltStore, filename string) {
 func main() {
 	// Open the my.db data file in your current directory.
 	// It will be created if it doesn't exist.
-	bs, err := NewBoltStore("my.db")
+	bs, err := NewLevelDBStore("my.db")
 	check(err)
 	defer bs.Close()
 
