@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,7 +33,6 @@ func main() {
 	matches, err := filepath.Glob(arg)
 	check(err)
 	for _, fp := range matches {
-		fmt.Println(fp)
 		err = Index(mystore, myindexer, fp)
 	}
 	check(err)
