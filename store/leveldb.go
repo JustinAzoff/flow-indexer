@@ -117,7 +117,6 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Start: %x\nEnd: %x\n", start, end)
 	bs := bitset.New(8)
 	tmpbs := bitset.New(8)
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
