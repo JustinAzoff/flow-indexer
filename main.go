@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/justinazoff/flow-indexer/backend"
@@ -21,16 +23,19 @@ func main() {
 	mystore, err := store.NewStore("leveldb", dbfile)
 	check(err)
 	defer mystore.Close()
-	isFile := true
 	arg := os.Args[2]
-	if _, err := os.Stat(arg); os.IsNotExist(err) {
-		isFile = false
+
+	err = mystore.QueryString(arg)
+	if err == nil {
+		return
 	}
-	if isFile {
-		myindexer := backend.NewBackend("bro")
-		check(err)
-		Index(mystore, myindexer, arg)
-	} else {
-		mystore.QueryString(arg)
+
+	myindexer := backend.NewBackend("bro")
+	matches, err := filepath.Glob(arg)
+	check(err)
+	for _, fp := range matches {
+		fmt.Println(fp)
+		err = Index(mystore, myindexer, fp)
 	}
+	check(err)
 }
