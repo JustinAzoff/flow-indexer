@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/justinazoff/flow-indexer/ipset"
+	"github.com/JustinAzoff/flow-indexer/ipset"
 	gzip "github.com/klauspost/pgzip"
 )
 

@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/justinazoff/flow-indexer/ipset"
+	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
 func PutUVarint(v uint64) []byte {

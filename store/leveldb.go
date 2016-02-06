@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/justinazoff/flow-indexer/ipset"
+	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/willf/bitset"
 )

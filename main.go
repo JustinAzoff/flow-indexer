@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"runtime"
 
-	"github.com/justinazoff/flow-indexer/backend"
-	"github.com/justinazoff/flow-indexer/store"
+	"github.com/JustinAzoff/flow-indexer/cmd"
 )
 
 func check(err error) {
@@ -19,25 +17,8 @@ func check(err error) {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	dbfile := os.Args[1]
-	mystore, err := store.NewStore("leveldb", dbfile)
-	check(err)
-	defer mystore.Close()
-	arg := os.Args[2]
-
-	docs, err := mystore.QueryString(arg)
-	if err == nil {
-		for _, doc := range docs {
-			fmt.Println(doc)
-		}
-		return
+	if err := cmd.RootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
 	}
-
-	myindexer := backend.NewBackend("bro")
-	matches, err := filepath.Glob(arg)
-	check(err)
-	for _, fp := range matches {
-		err = Index(mystore, myindexer, fp)
-	}
-	check(err)
 }

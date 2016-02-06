@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"github.com/justinazoff/flow-indexer/ipset"
+	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
 type ExtractResult struct {
