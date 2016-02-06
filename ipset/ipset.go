@@ -26,6 +26,19 @@ func IPToByteString(s string) (string, error) {
 	return string([]byte(ip)), nil
 }
 
+func CIDRToByteStrings(s string) (string, string, error) {
+	_, nw, err := net.ParseCIDR(s)
+	if err != nil {
+		return "", "", err
+	}
+	firstIP := nw.IP
+	lastIP := make(net.IP, len(nw.IP))
+	for i := 0; i < len(lastIP); i++ {
+		lastIP[i] = firstIP[i] | ^nw.Mask[i]
+	}
+	return string([]byte(firstIP)), string([]byte(lastIP)), nil
+}
+
 func (set *Set) AddString(s string) error {
 	keyString, err := IPToByteString(s)
 	if err != nil {
