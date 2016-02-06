@@ -1,9 +1,10 @@
-package main
+package store
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
 	"github.com/justinazoff/flow-indexer/ipset"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/willf/bitset"
@@ -14,7 +15,7 @@ type LevelDBStore struct {
 	batch *leveldb.Batch
 }
 
-func NewLevelDBStore(filename string) (*LevelDBStore, error) {
+func NewLevelDBStore(filename string) (IpStore, error) {
 	db, err := leveldb.OpenFile("mylevel.db", nil)
 	if err != nil {
 		return nil, err
