@@ -26,10 +26,10 @@ var storeFactories = map[string]func(string) (IpStore, error){
 }
 
 func NewStore(storeType string, filename string) (IpStore, error) {
-	storeFactory, ok := storeFactories[storeType]
+	_, ok := storeFactories[storeType]
 	if !ok {
 		return nil, errors.New("Invalid store type")
 	}
-	s, err := storeFactory(filename)
+	s, err := NewLevelDBStore(filename)
 	return s, err
 }

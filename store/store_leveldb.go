@@ -16,7 +16,7 @@ type LevelDBStore struct {
 }
 
 func NewLevelDBStore(filename string) (IpStore, error) {
-	db, err := leveldb.OpenFile("mylevel.db", nil)
+	db, err := leveldb.OpenFile(filename, nil)
 	if err != nil {
 		return nil, err
 	}

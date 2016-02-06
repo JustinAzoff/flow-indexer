@@ -18,17 +18,19 @@ func check(err error) {
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	dbfile := os.Args[1]
-	bs, err := store.NewStore("leveldb", dbfile)
+	mystore, err := store.NewStore("leveldb", dbfile)
 	check(err)
-	defer bs.Close()
+	defer mystore.Close()
 	isFile := true
 	arg := os.Args[2]
 	if _, err := os.Stat(arg); os.IsNotExist(err) {
 		isFile = false
 	}
 	if isFile {
-		backend.IndexBroLog(bs, arg)
+		myindexer := backend.NewBackend("bro")
+		check(err)
+		Index(mystore, myindexer, arg)
 	} else {
-		bs.QueryString(arg)
+		mystore.QueryString(arg)
 	}
 }
