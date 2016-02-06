@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -24,8 +25,11 @@ func main() {
 	defer mystore.Close()
 	arg := os.Args[2]
 
-	err = mystore.QueryString(arg)
+	docs, err := mystore.QueryString(arg)
 	if err == nil {
+		for _, doc := range docs {
+			fmt.Println(doc)
+		}
 		return
 	}
 

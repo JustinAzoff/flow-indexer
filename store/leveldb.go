@@ -82,15 +82,15 @@ func (ls *LevelDBStore) DocumentIDToName(id uint64) (string, error) {
 	return string(v), err
 }
 
-func (ls *LevelDBStore) QueryString(ip string) error {
+func (ls *LevelDBStore) QueryString(ip string) ([]string, error) {
 	key, err := ipset.IPToByteString(ip)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var docs []string
 	v, err := ls.db.Get([]byte(key), nil)
 	if err == leveldb.ErrNotFound {
-		fmt.Printf("%s does not exist\n", ip)
-		return nil
+		return docs, nil
 	}
 	bs := bitset.New(8)
 	bs.ReadFrom(bytes.NewBuffer(v))
@@ -99,9 +99,9 @@ func (ls *LevelDBStore) QueryString(ip string) error {
 		if err != nil {
 			break
 		}
-		fmt.Println(name)
+		docs = append(docs, name)
 	}
-	return err
+	return docs, err
 }
 
 func (ls *LevelDBStore) nextDocID() (uint64, error) {

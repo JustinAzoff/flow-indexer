@@ -17,7 +17,7 @@ type IpStore interface {
 	Close() error
 	HasDocument(filename string) (bool, error)
 	AddDocument(filename string, ips ipset.Set) error
-	QueryString(ip string) error
+	QueryString(ip string) ([]string, error)
 }
 
 var storeFactories = map[string]func(string) (IpStore, error){
