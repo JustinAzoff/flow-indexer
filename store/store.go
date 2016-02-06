@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/binary"
 	"errors"
+	"net"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
@@ -18,6 +19,7 @@ type IpStore interface {
 	HasDocument(filename string) (bool, error)
 	AddDocument(filename string, ips ipset.Set) error
 	QueryString(ip string) ([]string, error)
+	ExpandCIDR(ip string) ([]net.IP, error)
 }
 
 var storeFactories = map[string]func(string) (IpStore, error){
