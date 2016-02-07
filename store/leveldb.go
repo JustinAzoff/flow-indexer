@@ -9,6 +9,8 @@ import (
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/filter"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"github.com/willf/bitset"
 )
@@ -19,7 +21,18 @@ type LevelDBStore struct {
 }
 
 func NewLevelDBStore(filename string) (IpStore, error) {
-	db, err := leveldb.OpenFile(filename, nil)
+	//Options taken from ledisdb
+	opts := &opt.Options{}
+	opts.BlockSize = 32768
+	opts.WriteBuffer = 67108864
+	opts.BlockCacheCapacity = 524288000
+	opts.OpenFilesCacheCapacity = 1024
+	opts.CompactionTableSize = 32 * 1024 * 1024
+	opts.WriteL0SlowdownTrigger = 16
+	opts.WriteL0PauseTrigger = 64
+	opts.Filter = filter.NewBloomFilter(10)
+
+	db, err := leveldb.OpenFile(filename, opts)
 	if err != nil {
 		return nil, err
 	}
