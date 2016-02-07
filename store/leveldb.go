@@ -31,6 +31,10 @@ func (ls *LevelDBStore) Close() error {
 	return ls.db.Close()
 }
 
+func (ls *LevelDBStore) Compact() error {
+	return ls.db.CompactRange(util.Range{Start: nil, Limit: nil})
+}
+
 func (ls *LevelDBStore) HasDocument(filename string) (bool, error) {
 	_, err := ls.db.Get([]byte(filename), nil)
 	if err == leveldb.ErrNotFound {

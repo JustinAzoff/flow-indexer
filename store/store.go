@@ -20,6 +20,7 @@ type IpStore interface {
 	AddDocument(filename string, ips ipset.Set) error
 	QueryString(ip string) ([]string, error)
 	ExpandCIDR(ip string) ([]net.IP, error)
+	Compact() error
 }
 
 var storeFactories = map[string]func(string) (IpStore, error){
