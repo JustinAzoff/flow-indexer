@@ -39,7 +39,7 @@ func (b BroBackend) ExtractIps(filename string) (*ipset.Set, error) {
 			return s, err
 		}
 		if line[0] != '#' {
-			parts := strings.Split(line, "\t")
+			parts := strings.SplitN(line, "\t", 6) //makes parts[4] the last full split
 			s.AddString(parts[2])
 			s.AddString(parts[4])
 			lines++
