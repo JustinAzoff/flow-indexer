@@ -43,7 +43,7 @@ func RunIndex(dbpath string, args []string) {
 		check(err)
 		for _, fp := range matches {
 			err = Index(mystore, mybackend, fp)
+			check(err)
 		}
-		check(err)
 	}
 }
