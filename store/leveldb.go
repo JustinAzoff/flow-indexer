@@ -72,8 +72,8 @@ func (ls *LevelDBStore) AddDocument(filename string, ips ipset.Set) error {
 	if err != nil {
 		return err
 	}
-	ls.setDocId(filename, nextID)
 	ls.batch = new(leveldb.Batch)
+	ls.setDocId(filename, nextID)
 	for k, _ := range ips.Store {
 		//fmt.Printf("Add %#v to document\n", k)
 		ls.addIP(nextID, k)
@@ -193,11 +193,11 @@ func (ls *LevelDBStore) nextDocID() (uint64, error) {
 	return maxID + 1, nil
 
 }
-func (ls *LevelDBStore) setDocId(filename string, id uint64) error {
+func (ls *LevelDBStore) setDocId(filename string, id uint64) {
 	idBytes := PutUVarint(id)
-	ls.db.Put([]byte(filename), idBytes, nil)
-	ls.db.Put(idBytes, []byte(filename), nil)
-	return ls.db.Put([]byte("max_id"), idBytes, nil)
+	ls.batch.Put([]byte(filename), idBytes)
+	ls.batch.Put(idBytes, []byte(filename))
+	ls.batch.Put([]byte("max_id"), idBytes)
 }
 
 func (ls *LevelDBStore) addIP(id uint64, k string) error {
