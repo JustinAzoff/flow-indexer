@@ -21,8 +21,11 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 	}
 
 	ips, err := b.ExtractIps(filename)
-	if err != nil {
+	if ips == nil && err != nil {
 		return err
+	}
+	if err != nil {
+		log.Printf("%s: Non fatal read error: %s\n", filename, err)
 	}
 	start := time.Now()
 	s.AddDocument(filename, *ips)
