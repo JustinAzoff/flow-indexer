@@ -8,6 +8,7 @@
       expandcidr  Expand a CIDR range from those seen in the database
       index       Index flows
       search      Search flows
+      web         Start http API
       help        Help about any command
 
     Flags:
