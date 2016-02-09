@@ -3,9 +3,8 @@ package store
 import (
 	"encoding/binary"
 	"errors"
-	"net"
-
 	"github.com/JustinAzoff/flow-indexer/ipset"
+	"net"
 )
 
 var (
@@ -23,6 +22,13 @@ func buildDocumentKey(id uint64) []byte {
 	b := make([]byte, 10+len(docKeyPrefix))
 	copy(b[:], docKeyPrefix)
 	binary.PutUvarint(b[len(docKeyPrefix):], id)
+	return b
+}
+
+func buildFilenameKey(fn string) []byte {
+	b := make([]byte, len(docKeyPrefix)+len(fn))
+	copy(b[:], docKeyPrefix)
+	copy(b[len(docKeyPrefix):], fn)
 	return b
 }
 

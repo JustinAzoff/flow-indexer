@@ -49,7 +49,8 @@ func (ls *LevelDBStore) Compact() error {
 }
 
 func (ls *LevelDBStore) HasDocument(filename string) (bool, error) {
-	_, err := ls.db.Get([]byte(filename), nil)
+	key := buildFilenameKey(filename)
+	_, err := ls.db.Get(key, nil)
 	if err == leveldb.ErrNotFound {
 		return false, nil
 	}
@@ -202,7 +203,8 @@ func (ls *LevelDBStore) nextDocID() (uint64, error) {
 
 func (ls *LevelDBStore) setDocId(filename string, id uint64) {
 	idBytes := buildDocumentKey(id) // doc:xxx
-	ls.batch.Put([]byte(filename), idBytes[4:])
+	fnBytes := buildFilenameKey(filename)
+	ls.batch.Put(fnBytes, idBytes[4:])
 	ls.batch.Put(idBytes, []byte(filename))
 	ls.batch.Put([]byte("max_id"), idBytes[4:])
 }
