@@ -4,26 +4,21 @@ import (
 	"bufio"
 	"io"
 	"log"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
-	gzip "github.com/klauspost/pgzip"
 )
 
 type BroBackend struct {
 }
 
 func (b BroBackend) ExtractIps(filename string) (*ipset.Set, error) {
-	f, err := os.Open(filename)
+	reader, err := OpenDecompress(filename)
 	if err != nil {
 		return nil, err
 	}
-	reader, err := gzip.NewReader(f)
-	if err != nil {
-		return nil, err
-	}
+	defer reader.Close()
 	br := bufio.NewReader(reader)
 
 	s := ipset.New()
