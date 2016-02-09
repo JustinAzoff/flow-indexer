@@ -67,5 +67,5 @@ func startWeb() {
 		stores = append(stores, mystore)
 	}
 	http.Handle("/search", &storeHandler{stores: stores})
-	log.Fatal(http.ListenAndServe("127.0.0.1:7070", nil))
+	log.Fatal(http.ListenAndServe(bind, nil))
 }
