@@ -97,7 +97,7 @@ func (ls *LevelDBStore) ListDocuments() error {
 }
 
 func (ls *LevelDBStore) DocumentIDToName(id uint64) (string, error) {
-	idBytes := PutUVarint(id)
+	idBytes := buildDocumentKey(id)
 	v, err := ls.db.Get(idBytes, nil)
 	return string(v), err
 }
@@ -111,6 +111,9 @@ func (ls *LevelDBStore) ExpandCIDR(ip string) ([]net.IP, error) {
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
 		key := iter.Key()
+		if bytes.HasPrefix(key, docKeyPrefix) {
+			continue
+		}
 		keycopy := make([]byte, len(key))
 		copy(keycopy, key)
 		ip := net.IP(keycopy)
@@ -138,6 +141,9 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 	tmpbs := bitset.New(8)
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
+		if bytes.HasPrefix(iter.Key(), docKeyPrefix) {
+			continue
+		}
 		tmpbs.ReadFrom(bytes.NewBuffer(iter.Value()))
 		bs = bs.Union(tmpbs)
 	}
@@ -193,11 +199,12 @@ func (ls *LevelDBStore) nextDocID() (uint64, error) {
 	return maxID + 1, nil
 
 }
+
 func (ls *LevelDBStore) setDocId(filename string, id uint64) {
-	idBytes := PutUVarint(id)
-	ls.batch.Put([]byte(filename), idBytes)
+	idBytes := buildDocumentKey(id) // doc:xxx
+	ls.batch.Put([]byte(filename), idBytes[4:])
 	ls.batch.Put(idBytes, []byte(filename))
-	ls.batch.Put([]byte("max_id"), idBytes)
+	ls.batch.Put([]byte("max_id"), idBytes[4:])
 }
 
 func (ls *LevelDBStore) addIP(id uint64, k string) error {

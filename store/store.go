@@ -8,9 +8,21 @@ import (
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
+var (
+	docKeyPrefix = []byte{'d', 'o', 'c', ':'}
+)
+
 func PutUVarint(v uint64) []byte {
 	b := make([]byte, 10)
 	binary.PutUvarint(b, uint64(v))
+	return b
+}
+
+//buildDocumentKey builds a byte array containing doc: and the varint encoded id
+func buildDocumentKey(id uint64) []byte {
+	b := make([]byte, 10+len(docKeyPrefix))
+	copy(b[:], docKeyPrefix)
+	binary.PutUvarint(b[len(docKeyPrefix):], id)
 	return b
 }
 
