@@ -18,6 +18,13 @@
             "filename_to_database_regex": "logs/(?P<year>\\d+)-\\d+-\\d+/",
             "database_root": "/bro/index/http/",
             "database_path": "$year.db"
+        },
+        {
+            "name": "notice",
+            "backend": "bro",
+            "file_glob": "/bro/logs/*/notice.*gz",
+            "database_root": "/bro/index/",
+            "database_path": "notice.db"
         }
     ]
 }
