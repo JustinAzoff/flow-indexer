@@ -16,8 +16,9 @@ import (
 )
 
 type LevelDBStore struct {
-	db    *leveldb.DB
-	batch *leveldb.Batch
+	Filename string
+	db       *leveldb.DB
+	batch    *leveldb.Batch
 }
 
 func NewLevelDBStore(filename string) (IpStore, error) {
@@ -36,7 +37,7 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	newStore := &LevelDBStore{db: db, batch: nil}
+	newStore := &LevelDBStore{db: db, batch: nil, Filename: filename}
 	return newStore, nil
 }
 
