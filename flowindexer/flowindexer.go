@@ -46,17 +46,33 @@ func loadConfig(filename string) (Config, error) {
 	return cfg, err
 }
 
+func parseConfig(jsonBlob []byte) (Config, error) {
+	var cfg Config
+	err := json.Unmarshal(jsonBlob, &cfg)
+	return cfg, err
+}
+
 func NewFlowIndexerFromConfigFilename(filename string) (*FlowIndexer, error) {
 	cfg, err := loadConfig(filename)
 	if err != nil {
 		return nil, err
 	}
+	return NewFlowIndexerFromConfig(cfg), nil
+}
+func NewFlowIndexerFromConfigBytes(jsonBlob []byte) (*FlowIndexer, error) {
+	cfg, err := parseConfig(jsonBlob)
+	if err != nil {
+		return nil, err
+	}
+	return NewFlowIndexerFromConfig(cfg), nil
+}
+func NewFlowIndexerFromConfig(cfg Config) *FlowIndexer {
 	indexerMap := make(map[string]Indexer)
 	for _, indexercfg := range cfg.Indexers {
 		indexer := Indexer{config: indexercfg}
 		indexerMap[indexercfg.Name] = indexer
 	}
-	return &FlowIndexer{config: cfg, indexers: indexerMap}, nil
+	return &FlowIndexer{config: cfg, indexers: indexerMap}
 }
 
 func (fi *FlowIndexer) GetIndexer(name string) (*Indexer, error) {
