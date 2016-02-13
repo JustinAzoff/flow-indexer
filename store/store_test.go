@@ -39,6 +39,8 @@ var basicExpandCidrTable = []struct {
 	{"100.111.99.0/24", []net.IP{}},
 	//'/log' converted to an IP is 47.108.111.103
 	{"47.108.111.0/24", []net.IP{}},
+	//max_id converted to an ip is 109.97.120.95
+	{"109.97.120.0/24", []net.IP{}},
 }
 
 func runTest(t *testing.T, s IpStore) {

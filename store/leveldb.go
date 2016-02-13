@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 
@@ -38,6 +39,7 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 		return nil, err
 	}
 	newStore := &LevelDBStore{db: db, batch: nil, filename: filename}
+	newStore.fixDocId()
 	return newStore, nil
 }
 
@@ -190,8 +192,26 @@ func (ls *LevelDBStore) bitsetToDocs(bs *bitset.BitSet) ([]string, error) {
 	return docs, err
 }
 
-func (ls *LevelDBStore) nextDocID() (uint64, error) {
+//fixDocId fixes an issue where the max docid was stored under max_id
+//instead of doc:max_id so a search for 109.97.120.95 would find it
+func (ls *LevelDBStore) fixDocId() {
 	v, err := ls.db.Get([]byte("max_id"), nil)
+	if err == leveldb.ErrNotFound {
+		return
+	}
+	if err != nil {
+		return
+	}
+	//key max_id exists, rewrite it to doc:max_id
+	log.Println("FIX: Renaming max_id to doc:max_id")
+	batch := new(leveldb.Batch)
+	batch.Put([]byte("doc:max_id"), v)
+	batch.Delete([]byte("max_id"))
+	ls.db.Write(batch, nil)
+}
+
+func (ls *LevelDBStore) nextDocID() (uint64, error) {
+	v, err := ls.db.Get([]byte("doc:max_id"), nil)
 	if err == leveldb.ErrNotFound {
 		return 0, nil
 	}
@@ -211,7 +231,7 @@ func (ls *LevelDBStore) setDocId(filename string, id uint64) {
 	fnBytes := buildFilenameKey(filename)
 	ls.batch.Put(fnBytes, idBytes[4:])
 	ls.batch.Put(idBytes, []byte(filename))
-	ls.batch.Put([]byte("max_id"), idBytes[4:])
+	ls.batch.Put([]byte("doc:max_id"), idBytes[4:])
 }
 
 func (ls *LevelDBStore) addIP(id uint64, k string) error {
