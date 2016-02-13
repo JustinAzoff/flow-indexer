@@ -41,7 +41,7 @@ type Indexer struct {
 }
 
 type FlowIndexer struct {
-	indexers map[string]Indexer
+	indexers map[string]*Indexer
 	config   Config
 }
 
@@ -78,7 +78,7 @@ func NewFlowIndexerFromConfigBytes(jsonBlob []byte) (*FlowIndexer, error) {
 	return NewFlowIndexerFromConfig(cfg), nil
 }
 func NewFlowIndexerFromConfig(cfg Config) *FlowIndexer {
-	indexerMap := make(map[string]Indexer)
+	indexerMap := make(map[string]*Indexer)
 	for _, indexercfg := range cfg.Indexers {
 		if indexercfg.Store == "" {
 			indexercfg.Store = store.DefaultStore
@@ -86,7 +86,7 @@ func NewFlowIndexerFromConfig(cfg Config) *FlowIndexer {
 		indexer := Indexer{config: indexercfg}
 		indexer.storeMap = make(map[string]store.IpStore)
 		indexer.indexedFilenames = make(map[string]bool)
-		indexerMap[indexercfg.Name] = indexer
+		indexerMap[indexercfg.Name] = &indexer
 	}
 	return &FlowIndexer{config: cfg, indexers: indexerMap}
 }
@@ -96,7 +96,7 @@ func (fi *FlowIndexer) GetIndexer(name string) (*Indexer, error) {
 	if !ok {
 		return nil, fmt.Errorf("Indexer %q not found", name)
 	}
-	return &indexer, nil
+	return indexer, nil
 }
 
 func (i *Indexer) ListDatabases() ([]string, error) {
@@ -196,7 +196,6 @@ func (i *Indexer) RefreshStores() error {
 		if alreadyExists {
 			continue
 		}
-		log.Printf("Opening %s\n", db)
 		_, err = i.OpenOrCreateStore(db)
 		if err != nil {
 			log.Printf("Error opening %s: %s\n", db, err)

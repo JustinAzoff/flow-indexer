@@ -28,7 +28,6 @@ func (fh *fiHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("%#v\n", indexer.stores)
 	for _, store := range indexer.stores {
 		docs, err := store.QueryString(query)
 		if err != nil {
