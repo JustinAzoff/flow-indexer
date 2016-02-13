@@ -16,7 +16,7 @@ import (
 )
 
 type LevelDBStore struct {
-	Filename string
+	filename string
 	db       *leveldb.DB
 	batch    *leveldb.Batch
 }
@@ -37,7 +37,7 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	newStore := &LevelDBStore{db: db, batch: nil, Filename: filename}
+	newStore := &LevelDBStore{db: db, batch: nil, filename: filename}
 	return newStore, nil
 }
 
@@ -47,6 +47,10 @@ func (ls *LevelDBStore) Close() error {
 
 func (ls *LevelDBStore) Compact() error {
 	return ls.db.CompactRange(util.Range{Start: nil, Limit: nil})
+}
+
+func (ls *LevelDBStore) Filename() string {
+	return ls.filename
 }
 
 func (ls *LevelDBStore) HasDocument(filename string) (bool, error) {

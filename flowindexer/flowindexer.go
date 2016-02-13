@@ -24,8 +24,13 @@ type indexerConfig struct {
 	DatabasePath            string `json:"database_path"`
 }
 
+type httpConfig struct {
+	Bind string `json:"bind"`
+}
+
 type Config struct {
 	Indexers []indexerConfig `json:"indexers"`
+	HTTP     httpConfig      `json:"http"`
 }
 
 type Indexer struct {
@@ -218,26 +223,14 @@ func RunDaemon(config string) {
 		log.Fatal(err)
 	}
 
-	indexer, err := fi.GetIndexer("bro")
-	if err != nil {
-		log.Fatal(err)
-	}
+	go startWeb(fi)
 
 	for {
-
-		indexer.RefreshStores()
-		indexer.IndexAll()
-		for _, store := range indexer.stores {
-			log.Printf("Looking at store %s\n", store.Filename())
-			docs, err := store.QueryString("76.20.248.132")
-			if err != nil {
-				log.Fatal(err)
-			}
-			for _, doc := range docs {
-				fmt.Printf("%s\n", doc)
-			}
+		for _, indexer := range fi.indexers {
+			indexer.RefreshStores()
+			indexer.IndexAll()
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 }

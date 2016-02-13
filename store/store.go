@@ -39,7 +39,10 @@ type IpStore interface {
 	QueryString(ip string) ([]string, error)
 	ExpandCIDR(ip string) ([]net.IP, error)
 	Compact() error
+	Filename() string
 }
+
+var DefaultStore = "leveldb"
 
 var storeFactories = map[string]func(string) (IpStore, error){
 	"leveldb": NewLevelDBStore,
