@@ -127,10 +127,21 @@ func (i *Indexer) FilenameToDatabaseFilename(filename string) (string, error) {
 	return filepath.Join(i.config.DatabaseRoot, db), nil
 }
 
-func (i *Indexer) IndexOne(filename string) error {
+func (i *Indexer) IndexOne(filename string, checkGrowing bool) error {
 	_, alreadyIndexed := i.indexedFilenames[filename]
 	if alreadyIndexed {
 		return nil
+	}
+	if checkGrowing {
+		stillGrowing, err := isFileGrowing(filename)
+		if err != nil {
+			log.Printf("Failed to check if %q is growing: %q", filename, err)
+			return err
+		}
+		if stillGrowing {
+			log.Printf("Skipping still growing file %q\n", filename)
+			return nil
+		}
 	}
 
 	dbPath, err := i.FilenameToDatabaseFilename(filename)
@@ -158,8 +169,11 @@ func (i *Indexer) IndexAll() error {
 	if err != nil {
 		return err
 	}
-	for _, l := range logs {
-		i.IndexOne(l)
+	for idx, l := range logs {
+		//Assume the last file in the list is the most recent one
+		//and check to see if it is still growing before indexing it
+		checkGrowing := idx == len(logs)-1
+		i.IndexOne(l, checkGrowing)
 	}
 
 	return nil
