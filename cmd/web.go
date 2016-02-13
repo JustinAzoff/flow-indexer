@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/JustinAzoff/flow-indexer/store"
-	"github.com/spf13/cobra"
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/JustinAzoff/flow-indexer/store"
+	"github.com/spf13/cobra"
 )
 
 var bind string

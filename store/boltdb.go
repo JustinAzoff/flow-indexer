@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/boltdb/bolt"
 	"github.com/willf/bitset"

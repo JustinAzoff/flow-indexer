@@ -2,11 +2,12 @@ package store
 
 import (
 	"fmt"
-	"github.com/JustinAzoff/flow-indexer/ipset"
 	"net"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
 func makeIps(ss []string) []net.IP {

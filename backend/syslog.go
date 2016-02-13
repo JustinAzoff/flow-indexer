@@ -1,13 +1,13 @@
 package backend
 
 import (
-	"regexp"
-
 	"bufio"
-	"github.com/JustinAzoff/flow-indexer/ipset"
 	"io"
 	"log"
+	"regexp"
 	"time"
+
+	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
 type SyslogBackend struct {

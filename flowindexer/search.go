@@ -2,6 +2,7 @@ package flowindexer
 
 import (
 	"fmt"
+
 	"github.com/JustinAzoff/flow-indexer/store"
 )
 

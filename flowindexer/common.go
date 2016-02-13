@@ -1,10 +1,11 @@
 package flowindexer
+
 import (
-    "log"
+	"log"
 )
 
 func check(err error) {
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 }

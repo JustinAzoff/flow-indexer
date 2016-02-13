@@ -3,12 +3,13 @@ package backend
 import (
 	"compress/bzip2"
 	"fmt"
-	gzip "github.com/klauspost/pgzip"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	gzip "github.com/klauspost/pgzip"
 )
 
 //PipedDecompressor not used right now, but may come in handy

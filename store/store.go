@@ -3,8 +3,9 @@ package store
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/JustinAzoff/flow-indexer/ipset"
 	"net"
+
+	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
 var (
