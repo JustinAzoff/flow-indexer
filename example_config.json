@@ -1,0 +1,24 @@
+{
+    "http": {
+        "bind": ":8080"
+    },
+    "indexers": [
+        {
+            "name": "conn",
+            "backend": "bro",
+            "file_glob": "/bro/logs/*/conn.*gz",
+            "filename_to_database_regex": "logs/(?P<year>\\d+)-\\d+-\\d+/",
+            "database_root": "/bro/index/conn/",
+            "database_path": "$year.db"
+        },
+        {
+            "name": "http",
+            "backend": "bro",
+            "file_glob": "/bro/logs/*/http.*gz",
+            "filename_to_database_regex": "logs/(?P<year>\\d+)-\\d+-\\d+/",
+            "database_root": "/bro/index/http/",
+            "database_path": "$year.db"
+        }
+    ]
+}
+
