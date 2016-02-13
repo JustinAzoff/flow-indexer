@@ -44,3 +44,7 @@ func (b BroBackend) ExtractIps(filename string) (*ipset.Set, error) {
 	log.Printf("%s: Read %d lines in %s\n", filename, lines, duration)
 	return s, nil
 }
+
+func init() {
+	RegisterBackend("bro", BroBackend{})
+}

@@ -13,8 +13,10 @@ type Backend interface {
 	ExtractIps(filename string) (*ipset.Set, error)
 }
 
-var backends = map[string]Backend{
-	"bro": BroBackend{},
+var backends = map[string]Backend{}
+
+func RegisterBackend(name string, backend Backend) {
+	backends[name] = backend
 }
 
 func NewBackend(backendType string) Backend {
