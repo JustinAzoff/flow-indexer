@@ -238,11 +238,16 @@ func RunDaemon(config string) {
 
 	go startWeb(fi)
 
+	for _, indexer := range fi.indexers {
+		go func(indexer *Indexer) {
+			for {
+				indexer.RefreshStores()
+				indexer.IndexAll()
+				time.Sleep(60 * time.Second)
+			}
+		}(indexer)
+	}
 	for {
-		for _, indexer := range fi.indexers {
-			indexer.RefreshStores()
-			indexer.IndexAll()
-		}
 		time.Sleep(5 * time.Second)
 	}
 
