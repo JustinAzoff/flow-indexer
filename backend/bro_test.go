@@ -22,3 +22,10 @@ func TestBroExtractIps(t *testing.T) {
 
 	t.Logf("%v\n", len(ips.Store))
 }
+
+func BenchmarkBroExtract(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		b := BroBackend{}
+		b.ExtractIps("test_data/bro_conn_some_v6.log.gz")
+	}
+}

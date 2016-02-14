@@ -22,3 +22,10 @@ func TestSyslogExtractIps(t *testing.T) {
 
 	t.Logf("%v\n", len(ips.Store))
 }
+
+func BenchmarkSyslogExtract(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		b := SyslogBackend{}
+		b.ExtractIps("test_data/bro_conn_some_v6.log.gz")
+	}
+}
