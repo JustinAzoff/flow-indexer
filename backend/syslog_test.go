@@ -8,8 +8,7 @@ var expectedSyslogOutput = []string{}
 var expectedSyslogCount = 12
 
 func TestSyslogExtractIps(t *testing.T) {
-	b := SyslogBackend{}
-	ips, err := b.ExtractIps("test_data/bro_conn_some_v6.log.gz")
+	ips, err := ExtractIps("syslog", "test_data/bro_conn_some_v6.log.gz")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +24,6 @@ func TestSyslogExtractIps(t *testing.T) {
 
 func BenchmarkSyslogExtract(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		b := SyslogBackend{}
-		b.ExtractIps("test_data/bro_conn_some_v6.log.gz")
+		ExtractIps("syslog", "test_data/bro_conn_some_v6.log.gz")
 	}
 }
