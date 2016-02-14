@@ -45,6 +45,12 @@ type FlowIndexer struct {
 	config   Config
 }
 
+type queryStat struct {
+	Hits  int    `json:"hits"`
+	First string `json:"first"`
+	Last  string `json:"last"`
+}
+
 func loadConfig(filename string) (Config, error) {
 	var cfg Config
 	file, err := os.Open(filename)
@@ -228,6 +234,31 @@ func (i *Indexer) RefreshStores() error {
 	}
 	i.stores = newStores
 	return nil
+}
+func (i *Indexer) QueryString(query string) ([]string, error) {
+	var documents []string
+	for _, store := range i.stores {
+		docs, err := store.QueryString(query)
+		if err != nil {
+			return documents, err
+		}
+		documents = append(documents, docs...)
+	}
+	return documents, nil
+}
+
+func (i *Indexer) Stats(query string) (queryStat, error) {
+	var stat = queryStat{}
+	docs, err := i.QueryString(query)
+	if err != nil {
+		return stat, nil
+	}
+	if len(docs) > 0 {
+		stat.First = docs[0]
+		stat.Last = docs[len(docs)-1]
+	}
+	stat.Hits = len(docs)
+	return stat, nil
 }
 
 func RunDaemon(config string) {
