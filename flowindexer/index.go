@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/JustinAzoff/flow-indexer/backend"
+	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/JustinAzoff/flow-indexer/store"
 )
 
@@ -19,17 +20,24 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 		log.Printf("%s Already indexed\n", filename)
 		return nil
 	}
-
-	ips, err := b.ExtractIps(filename)
-	if ips == nil && err != nil {
+	ips := ipset.New()
+	reader, err := backend.OpenDecompress(filename)
+	if err != nil {
 		return err
 	}
+	defer reader.Close()
+
+	start := time.Now()
+	lines, err := b.ExtractIps(reader, ips)
+	duration := time.Since(start)
+	log.Printf("%s: Read %d lines in %s\n", filename, lines, duration)
+
 	if err != nil {
 		log.Printf("%s: Non fatal read error: %s\n", filename, err)
 	}
-	start := time.Now()
+	start = time.Now()
 	s.AddDocument(filename, *ips)
-	duration := time.Since(start)
+	duration = time.Since(start)
 	log.Printf("%s: Wrote %d unique ips in %s\n", filename, len(ips.Store), duration)
 	return nil
 }

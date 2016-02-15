@@ -8,8 +8,7 @@ var expectedBroOutput = []string{}
 var expectedBroCount = 12
 
 func TestBroExtractIps(t *testing.T) {
-	b := BroBackend{}
-	ips, err := b.ExtractIps("test_data/bro_conn.log.gz")
+	ips, err := ExtractIps("bro", "test_data/bro_conn.log.gz")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +24,6 @@ func TestBroExtractIps(t *testing.T) {
 
 func BenchmarkBroExtract(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		b := BroBackend{}
-		b.ExtractIps("test_data/bro_conn_some_v6.log.gz")
+		ExtractIps("bro", "test_data/bro_conn_some_v6.log.gz")
 	}
 }

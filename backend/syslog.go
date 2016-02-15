@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"regexp"
-	"time"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
@@ -20,17 +19,10 @@ var IPRegexString = `[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|` +
 	`(([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4})*)?)::(([0-9A-Fa-f]{1,4}:)*)([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)` //CompressedHex4Dec
 var IPRegex = regexp.MustCompile(IPRegexString)
 
-func (b SyslogBackend) ExtractIps(filename string) (*ipset.Set, error) {
-	reader, err := OpenDecompress(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer reader.Close()
+func (b SyslogBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
 	br := bufio.NewReader(reader)
 
-	s := ipset.New()
-	lines := 0
-	start := time.Now()
+	lines := uint64(0)
 	for {
 		line, err := br.ReadString('\n')
 		if err == io.EOF {
@@ -38,17 +30,15 @@ func (b SyslogBackend) ExtractIps(filename string) (*ipset.Set, error) {
 		}
 		if err != nil {
 			log.Print(err)
-			return s, err
+			return lines, err
 		}
 		lines++
-		ips := IPRegex.FindAllString(line, -1)
-		for _, ip := range ips {
-			s.AddString(ip)
+		ipsFound := IPRegex.FindAllString(line, -1)
+		for _, ip := range ipsFound {
+			ips.AddString(ip)
 		}
 	}
-	duration := time.Since(start)
-	log.Printf("%s: Read %d lines in %s\n", filename, lines, duration)
-	return s, nil
+	return lines, nil
 }
 
 func init() {
