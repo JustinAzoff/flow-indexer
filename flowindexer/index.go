@@ -42,14 +42,14 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 	return nil
 }
 
-func RunIndex(dbpath string, args []string) {
+func RunIndex(dbpath string, backend_type string, args []string) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	mystore, err := store.NewStore("leveldb", dbpath)
 	check(err)
 	defer mystore.Close()
 
 	for _, path := range args {
-		mybackend := backend.NewBackend("bro")
+		mybackend := backend.NewBackend(backend_type)
 		matches, err := filepath.Glob(path)
 		check(err)
 		for _, fp := range matches {
