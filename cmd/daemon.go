@@ -9,8 +9,8 @@ var config string
 
 var cmdDaemon = &cobra.Command{
 	Use:   "daemon [args]",
-	Short: "daemon flows",
-	Long:  "daemon flows",
+	Short: "Start daemon",
+	Long:  "Start daemon that indexes flows and exposes HTTP api",
 	Run: func(cmd *cobra.Command, args []string) {
 		flowindexer.RunDaemon(config)
 	},
