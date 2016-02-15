@@ -25,7 +25,7 @@ Create configuration
 --------------------
 
     $ cp example_config.json config.json
-    $ vi config.json
+    $ vi config.json # Adjust log paths and database paths.
 
 The indexer configuration is as follows:
 
@@ -36,8 +36,9 @@ The indexer configuration is as follows:
 * database\_root - Where databases will be written to.  Should be indexer specific.
 * datapath\_path - The name of an individual database.  This can contain $variables set in filename\_to\_database\_regex.
 
-Adjust log paths and database paths.  The deciding factor for how to partition the databases is how many unique ips you see per day.
-I suggest starting with monthly indexes.  If the performance takes a huge hit by the end of the month, switch to daily indexes.
+The deciding factor for how to partition the databases is how many unique ips
+you see per day.  I suggest starting with monthly indexes.  If the indexing
+performance takes a huge hit by the end of the month, switch to daily indexes.
 
     $ ./flow-indexer daemon
 
