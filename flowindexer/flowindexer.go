@@ -251,7 +251,7 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 	var stat = queryStat{}
 	docs, err := i.QueryString(query)
 	if err != nil {
-		return stat, nil
+		return stat, err
 	}
 	if len(docs) > 0 {
 		stat.First = docs[0]
