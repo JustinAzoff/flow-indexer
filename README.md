@@ -21,10 +21,16 @@
 Quickstart
 ==========
 
+Install
+-------
+
+    $ export GOPATH=~/go
+    $ go get github.com/JustinAzoff/flow-indexer
+
 Create configuration
 --------------------
 
-    $ cp example_config.json config.json
+    $ cp ~/go/src/github.com/JustinAzoff/flow-indexer/example_config.json config.json
     $ vi config.json # Adjust log paths and database paths.
 
 The indexer configuration is as follows:
@@ -40,7 +46,7 @@ The deciding factor for how to partition the databases is how many unique ips
 you see per day.  I suggest starting with monthly indexes.  If the indexing
 performance takes a huge hit by the end of the month, switch to daily indexes.
 
-    $ ./flow-indexer daemon
+    $ ~/go/bin/flow-indexer daemon
 
 Query API
 ---------
