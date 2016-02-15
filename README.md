@@ -5,10 +5,10 @@
 
     Available Commands: 
       compact     Compact the database
+      daemon      Start daemon
       expandcidr  Expand a CIDR range from those seen in the database
       index       Index flows
       search      Search flows
-      web         Start http API
       help        Help about any command
 
     Flags:
@@ -18,8 +18,37 @@
 
     Use "flow-indexer [command] --help" for more information about a command.
 
-Example
-=======
+Quickstart
+==========
+
+Create configuration
+--------------------
+
+    $ cp example\_config.json config.json
+    $ vi config.json
+
+The indexer configuration is as follows:
+
+* name - The name of the indexer. Keep this short and lowercase, as you will use it as an http query param.
+* backend - The backend log ip extractor to use. Choices: bro, bro\_json, syslog.
+* file\_glob - The shell globbing pattern that should match all of your log files.
+* filename\_to\_database\_regex - A regular expression applied to each filename used to extract information used to name the database.
+* database\_root - Where databases will be written to.  Should be indexer specific.
+* datapath\_path - The name of an individual database.  This can contain $variables set in filename\_to\_database\_regex.
+
+Adjust log paths and database paths.  The deciding factor for how to partition the databases is how many unique ips you see per day.
+I suggest starting with monthly indexes.  If the performance takes a huge hit by the end of the month, switch to daily indexes.
+
+    $ ./flow-indexer daemon
+
+Query API
+---------
+
+    $ curl -s 'localhost:8080/search?i=conn&q=1.2.3.0/24"
+    $ curl -s 'localhost:8080/stats?i=conn&q=1.2.3.0/24"
+
+Lower level commands example
+============================
 
 Index flows
 -----------
