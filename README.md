@@ -24,7 +24,7 @@ Quickstart
 Create configuration
 --------------------
 
-    $ cp example\_config.json config.json
+    $ cp example_config.json config.json
     $ vi config.json
 
 The indexer configuration is as follows:
