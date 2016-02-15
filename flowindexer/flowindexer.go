@@ -267,6 +267,10 @@ func RunDaemon(config string) {
 		log.Fatal(err)
 	}
 
+	//Before starting the API, make sure all the stores are open
+	for _, indexer := range fi.indexers {
+		indexer.RefreshStores()
+	}
 	go startWeb(fi)
 
 	for _, indexer := range fi.indexers {
