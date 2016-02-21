@@ -3,10 +3,11 @@ package ipset
 import (
 	"fmt"
 	"net"
+	"sort"
 )
 
 type Set struct {
-	Store map[string]struct{}
+	store map[string]struct{}
 }
 
 func New() *Set {
@@ -44,6 +45,21 @@ func (set *Set) AddString(s string) error {
 	if err != nil {
 		return err
 	}
-	set.Store[keyString] = struct{}{}
+	set.store[keyString] = struct{}{}
 	return nil
+}
+
+func (set *Set) Count() int {
+	return len(set.store)
+}
+
+func (set *Set) SortedStrings() []string {
+	strings := make([]string, set.Count())
+	var i int = 0
+	for ip, _ := range set.store {
+		strings[i] = ip
+		i++
+	}
+	sort.Strings(strings)
+	return strings
 }

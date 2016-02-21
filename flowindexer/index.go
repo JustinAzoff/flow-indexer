@@ -38,7 +38,7 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 	start = time.Now()
 	s.AddDocument(filename, *ips)
 	duration = time.Since(start)
-	log.Printf("%s: Wrote %d unique ips in %s\n", filename, len(ips.Store), duration)
+	log.Printf("%s: Wrote %d unique ips in %s\n", filename, ips.Count(), duration)
 	return nil
 }
 

@@ -17,9 +17,9 @@ func TestIpsetAdd(t *testing.T) {
 	for _, tt := range basicAddStringTests {
 		s := New()
 		s.AddString(tt.in)
-		for k, _ := range s.Store {
-			if k != tt.out {
-				t.Errorf("Ipset.AddString(%#v) => %#v, want %#v", tt.in, k, tt.out)
+		for _, ip := range s.SortedStrings() {
+			if ip != tt.out {
+				t.Errorf("Ipset.AddString(%#v) => %#v, want %#v", tt.in, ip, tt.out)
 			}
 		}
 	}

@@ -76,9 +76,9 @@ func (bs *BoltStore) AddDocument(filename string, ips ipset.Set) error {
 		fmt.Printf("NextDocID should be %d\n", nextID)
 		setDocId(b, filename, nextID)
 		ipBucket := tx.Bucket([]byte("ips"))
-		for k, _ := range ips.Store {
+		for _, ip := range ips.SortedStrings() {
 			//fmt.Printf("Add %#v to document\n", k)
-			addIP(ipBucket, nextID, k)
+			addIP(ipBucket, nextID, ip)
 		}
 		return nil
 	})

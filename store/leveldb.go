@@ -82,9 +82,9 @@ func (ls *LevelDBStore) AddDocument(filename string, ips ipset.Set) error {
 	}
 	ls.batch = new(leveldb.Batch)
 	ls.setDocId(filename, nextID)
-	for k, _ := range ips.Store {
-		//fmt.Printf("Add %#v to document\n", k)
-		ls.addIP(nextID, k)
+	for _, ip := range ips.SortedStrings() {
+		//fmt.Printf("Add %#v to document\n", ip)
+		ls.addIP(nextID, ip)
 	}
 	err = ls.db.Write(ls.batch, nil)
 	ls.batch = nil

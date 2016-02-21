@@ -12,14 +12,14 @@ func TestBroExtractIps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ips.Store) != expectedBroCount {
-		t.Errorf("BroBackend.ExtractIps count => %#v, want %#v", len(ips.Store), expectedBroCount)
+	if ips.Count() != expectedBroCount {
+		t.Errorf("BroBackend.ExtractIps count => %#v, want %#v", ips.Count(), expectedBroCount)
 	}
-	for k, _ := range ips.Store {
-		t.Logf("%x\n", k)
+	for _, ip := range ips.SortedStrings() {
+		t.Logf("%x\n", ip)
 	}
 
-	t.Logf("%v\n", len(ips.Store))
+	t.Logf("%v\n", ips.Count())
 }
 
 func BenchmarkBroExtract(b *testing.B) {
