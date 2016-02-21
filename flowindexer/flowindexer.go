@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/JustinAzoff/flow-indexer/backend"
@@ -266,10 +267,16 @@ func RunIndexAll(config string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var wg sync.WaitGroup
 
 	for _, indexer := range fi.indexers {
-		indexer.IndexAll()
+		wg.Add(1)
+		go func(indexer *Indexer) {
+			defer wg.Done()
+			indexer.IndexAll()
+		}(indexer)
 	}
+	wg.Wait()
 }
 
 func RunDaemon(config string) {
