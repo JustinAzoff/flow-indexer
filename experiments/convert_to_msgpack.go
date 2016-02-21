@@ -89,6 +89,7 @@ func main() {
 
 	totalBitset := 0
 	totalMsgpack := 0
+	totalCount := 0
 
 	rows := 0
 
@@ -104,6 +105,7 @@ func main() {
 		bs := bitset.New(8)
 		bs.ReadFrom(bytes.NewBuffer(value))
 		var docIDs []uint
+		totalCount += int(bs.Count())
 		for i, e := bs.NextSet(0); e; i, e = bs.NextSet(i + 1) {
 			docIDs = append(docIDs, i)
 		}
@@ -125,8 +127,9 @@ func main() {
 		rows++
 
 	}
-	fmt.Printf("bitset size is %d\n", totalBitset)
-	fmt.Printf("msgpack size is %d\n", totalMsgpack)
+	fmt.Printf("bitset size is  %10d\n", totalBitset)
+	fmt.Printf("msgpack size is %10d\n", totalMsgpack)
+	fmt.Printf("average documents set is %d\n", totalCount/rows)
 	newdb.Write(batch, nil)
 	newdb.CompactRange(util.Range{Start: nil, Limit: nil})
 
