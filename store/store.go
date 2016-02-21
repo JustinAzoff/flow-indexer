@@ -18,6 +18,25 @@ func PutUVarint(v uint64) []byte {
 	return b
 }
 
+func deltaEncode(docs []uint) []uint {
+	encoded := make([]uint, len(docs))
+	var last uint
+	for i, val := range docs {
+		encoded[i] = val - last
+		last = val
+	}
+	return encoded
+}
+func deltaDecode(docs []uint) []uint {
+	decoded := make([]uint, len(docs))
+	var last uint
+	for i, val := range docs {
+		decoded[i] = val + last
+		last = decoded[i]
+	}
+	return decoded
+}
+
 //buildDocumentKey builds a byte array containing doc: and the varint encoded id
 func buildDocumentKey(id uint64) []byte {
 	b := make([]byte, 10+len(docKeyPrefix))

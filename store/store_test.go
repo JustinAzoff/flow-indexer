@@ -87,3 +87,18 @@ func TestLeveldb(t *testing.T) {
 	runTest(t, mystore)
 
 }
+
+var deltaEncodingDocLists = [][]uint{
+	{1, 2, 3, 4},
+	{1, 100, 101, 104, 100000, 20000000},
+}
+
+func TestDeltaEncoding(t *testing.T) {
+	for _, docs := range deltaEncodingDocLists {
+		encoded := deltaEncode(docs)
+		decoded := deltaDecode(encoded)
+		if !reflect.DeepEqual(docs, decoded) {
+			t.Errorf("DeltaEncode => %v, want %v", decoded, docs)
+		}
+	}
+}
