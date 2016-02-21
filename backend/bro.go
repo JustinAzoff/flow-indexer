@@ -3,7 +3,6 @@ package backend
 import (
 	"bufio"
 	"io"
-	"log"
 	"strings"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
@@ -22,7 +21,6 @@ func (b BroBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error)
 			break
 		}
 		if err != nil {
-			log.Print(err)
 			return lines, err
 		}
 		if line[0] != '#' {
