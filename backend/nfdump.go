@@ -1,8 +1,10 @@
 package backend
 
 import (
+	"bufio"
 	"io"
 	"os/exec"
+	"strings"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
@@ -21,10 +23,26 @@ func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 	if err != nil {
 		return 0, err
 	}
-	lines, err := SyslogBackend{}.ExtractIps(stdout, ips)
-	cmd.Wait()
-	return lines, err
+	br := bufio.NewReader(stdout)
 
+	lines := uint64(0)
+	for {
+		line, err := br.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return lines, err
+		}
+		parts := strings.SplitN(line, ",", 6) //makes parts[4] the last full split
+		if len(parts) == 6 {
+			ips.AddString(parts[3])
+			ips.AddString(parts[4])
+			lines++
+		}
+	}
+	err = cmd.Wait()
+	return lines, err
 }
 
 func init() {
