@@ -2,7 +2,6 @@ package backend
 
 import (
 	"compress/bzip2"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -77,7 +76,7 @@ func OpenDecompress(fn string) (r io.ReadCloser, err error) {
 			ReadCloser: ioutil.NopCloser(bzr),
 			wrapped:    f,
 		}, nil
+	default:
+		return f, err
 	}
-
-	return nil, fmt.Errorf("Unknown filetype %s", ext)
 }
