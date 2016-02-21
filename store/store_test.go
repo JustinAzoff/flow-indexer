@@ -23,6 +23,7 @@ var basicSearchTable = []struct {
 	query string
 	docs  []string
 }{
+	{"1.2.3.4", []string{"/log/1.txt", "/log/2.txt"}},
 	{"1.2.3.4/24", []string{"/log/1.txt", "/log/2.txt"}},
 	{"2.0.0.0/8", []string{"/log/2.txt"}},
 }
@@ -61,7 +62,7 @@ func runTest(t *testing.T, s IpStore) {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(matches, tt.docs) {
-			t.Errorf("store.QueryString => %#v, want %#v", matches, tt.docs)
+			t.Errorf("store.QueryString(%v) => %#v, want %#v", tt.query, matches, tt.docs)
 		}
 	}
 
@@ -71,7 +72,7 @@ func runTest(t *testing.T, s IpStore) {
 			t.Fatal(err)
 		}
 		if fmt.Sprintf("%v", matches) != fmt.Sprintf("%v", tt.ips) {
-			t.Errorf("store.QueryString => %v, want %v", matches, tt.ips)
+			t.Errorf("store.ExpandCidrTable(%v) => %v, want %v", tt.query, matches, tt.ips)
 		}
 	}
 

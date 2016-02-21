@@ -8,6 +8,8 @@ import (
 	"net"
 	"strings"
 
+	"gopkg.in/vmihailenco/msgpack.v2"
+
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/filter"
@@ -146,14 +148,19 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 		return nil, err
 	}
 	bs := bitset.New(8)
-	tmpbs := bitset.New(8)
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
 		if bytes.HasPrefix(iter.Key(), docKeyPrefix) {
 			continue
 		}
-		tmpbs.ReadFrom(bytes.NewBuffer(iter.Value()))
-		bs = bs.Union(tmpbs)
+		var rawDocs []uint
+		err = msgpack.Unmarshal(iter.Value(), &rawDocs)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range deltaDecode(rawDocs) {
+			bs.Set(id)
+		}
 	}
 	iter.Release()
 	err = iter.Error()
@@ -174,9 +181,12 @@ func (ls *LevelDBStore) QueryStringIP(ip string) ([]string, error) {
 	if err == leveldb.ErrNotFound {
 		return docs, nil
 	}
-	bs := bitset.New(8)
-	bs.ReadFrom(bytes.NewBuffer(v))
-	return ls.bitsetToDocs(bs)
+	var rawDocs []uint
+	err = msgpack.Unmarshal(v, &rawDocs)
+	if err != nil {
+		return nil, err
+	}
+	return ls.docIDSToDocs(deltaDecode(rawDocs))
 }
 
 func (ls *LevelDBStore) bitsetToDocs(bs *bitset.BitSet) ([]string, error) {
@@ -184,6 +194,18 @@ func (ls *LevelDBStore) bitsetToDocs(bs *bitset.BitSet) ([]string, error) {
 	var docs []string
 	for i, e := bs.NextSet(0); e; i, e = bs.NextSet(i + 1) {
 		name, err := ls.DocumentIDToName(uint64(i))
+		if err != nil {
+			break
+		}
+		docs = append(docs, name)
+	}
+	return docs, err
+}
+func (ls *LevelDBStore) docIDSToDocs(docIDs []uint) ([]string, error) {
+	var err error
+	var docs []string
+	for _, id := range docIDs {
+		name, err := ls.DocumentIDToName(uint64(id))
 		if err != nil {
 			break
 		}
@@ -235,21 +257,27 @@ func (ls *LevelDBStore) setDocId(filename string, id uint64) {
 }
 
 func (ls *LevelDBStore) addIP(id uint64, k string) error {
-	bs := bitset.New(8)
 	v, err := ls.db.Get([]byte(k), nil)
 	if err != nil && err != leveldb.ErrNotFound {
 		return err
 	}
-	if err != leveldb.ErrNotFound {
-		bs.ReadFrom(bytes.NewBuffer(v))
+	var ids []uint
+	if err == leveldb.ErrNotFound {
+		ids = []uint{uint(id)}
+	} else {
+		var docs []uint
+		err := msgpack.Unmarshal(v, &docs)
+		if err != nil {
+			return err
+		}
+		decoded := deltaDecode(docs)
+		decoded = append(decoded, uint(id))
+		ids = deltaEncode(decoded)
 	}
-	bs.Set(uint(id))
-
-	buffer := bytes.NewBuffer(make([]byte, 0, bs.BinaryStorageSize()))
-	_, err = bs.WriteTo(buffer)
+	b, err := msgpack.Marshal(ids)
 	if err != nil {
 		return err
 	}
-	ls.batch.Put([]byte(k), buffer.Bytes())
+	ls.batch.Put([]byte(k), b)
 	return nil
 }
