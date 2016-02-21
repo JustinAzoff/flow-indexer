@@ -261,6 +261,17 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 	return stat, nil
 }
 
+func RunIndexAll(config string) {
+	fi, err := NewFlowIndexerFromConfigFilename(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, indexer := range fi.indexers {
+		indexer.IndexAll()
+	}
+}
+
 func RunDaemon(config string) {
 	fi, err := NewFlowIndexerFromConfigFilename(config)
 	if err != nil {
