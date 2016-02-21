@@ -84,11 +84,12 @@ var encodingTests = []struct {
 }
 
 func main() {
-	fmt.Printf("%-10s: %10s %10s %10s %10s %10s %10s %10s\n",
+	fmt.Printf("%-10s: %10s %10s %10s %10s %10s %10s %10s %10s\n",
 		"test",
 		"bitset", "bitset.s",
 		"msgpack", "msgpack.s",
-		"msgpackd", "msgpackd.s", "msgpack.d.z",
+		"msgpackd", "msgpackd.s", "msgpackd.z",
+		"msgpackd.s/bitset.s",
 	)
 	for _, t := range encodingTests {
 		bs := makeBitset(t.ids)
@@ -105,11 +106,12 @@ func main() {
 		lenMsgpackDeltasnappy := len(compressSnappy(mpd))
 		lenMsgpackDeltazlib := len(compressZlib(mpd))
 
-		fmt.Printf("%-10s: %10d %10d %10d %10d %10d %10d %10d\n",
+		fmt.Printf("%-10s: %10d %10d %10d %10d %10d %10d %10d %10d%%\n",
 			t.description,
 			lenBitset, lenBitsetSnappy,
 			lenMsgpack, lenMsgpacksnappy,
 			lenMsgpackDelta, lenMsgpackDeltasnappy, lenMsgpackDeltazlib,
+			uint64(100*float64(lenMsgpackDeltasnappy)/float64(lenBitsetSnappy)),
 		)
 		//fmt.Printf("\n%#v\nmessage pack delta %#v\nbitset: %#v\n", t.ids, mpd, bs)
 	}
