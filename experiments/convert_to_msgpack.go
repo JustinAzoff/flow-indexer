@@ -11,6 +11,27 @@
 //
 //The bitsets are mostly zeroes, so this is not unexpected.
 
+//A test against some low volume netflow logs that are stored in 5 minute
+//chunks was a bit different.  In this test the msgpack data was about 1/2 the
+//size.  This is likely due to the 12x increase in document ids.
+//
+//bitset size is 101032648
+//msgpack size is  2732415
+
+//7.3M    2015.db
+//3.7M    2015.test
+
+//I then added the delta_encode function and that got the file size down to
+//2.1M    2015.test
+
+//Then I revisited the original larger 2015-03 test, and with delta encoding:
+
+//bitset size is 1129122792
+//msgpack size is 247710481
+
+//428M    2015-03.db
+//295M    2015-03.test
+
 package main
 
 import (
@@ -44,8 +65,17 @@ func Open(filename string) (*leveldb.DB, error) {
 	return db, err
 }
 
-func main() {
+func delta_encode(docs []uint) []uint {
+	encoded := make([]uint, len(docs))
+	var last uint
+	for i, val := range docs {
+		encoded[i] = val - last
+		last = val
+	}
+	return encoded
+}
 
+func main() {
 	olddb, err := Open(os.Args[1])
 	if err != nil {
 		panic(err)
@@ -77,7 +107,7 @@ func main() {
 		for i, e := bs.NextSet(0); e; i, e = bs.NextSet(i + 1) {
 			docIDs = append(docIDs, i)
 		}
-		b, err := msgpack.Marshal(docIDs)
+		b, err := msgpack.Marshal(delta_encode(docIDs))
 		if err != nil {
 			panic(err)
 		}
