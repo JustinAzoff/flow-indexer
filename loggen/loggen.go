@@ -11,6 +11,22 @@ func RandomIPv4() string {
 		rand.Intn(256), rand.Intn(256), rand.Intn(256), rand.Intn(256))
 }
 
+func PartiallyRandomIPv4(randomOctects int) string {
+	switch randomOctects {
+	case 0:
+		return "1.2.3.4"
+	case 1:
+		return fmt.Sprintf("%d.2.3.4", rand.Intn(256))
+	case 2:
+		return fmt.Sprintf("%d.%d.3.4", rand.Intn(256), rand.Intn(256))
+	case 3:
+		return fmt.Sprintf("%d.%d.%d.4", rand.Intn(256), rand.Intn(256), rand.Intn(256))
+	case 4:
+		return fmt.Sprintf("%d.%d.%d.%d", rand.Intn(256), rand.Intn(256), rand.Intn(256), rand.Intn(256))
+	}
+	return "1.2.3.4"
+}
+
 var template = "1324071333.493287	ChcmbpkpM9NGNEFVi	%s	51880	%s	22	tcp	ssh	6.159326	2669	2501	SF	T	0	ShAdDaFf	25	3981	20	3549	(empty)\n"
 
 func RandomASCIIBroLog(lines int) []byte {

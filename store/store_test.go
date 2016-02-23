@@ -96,11 +96,13 @@ func runStoreBench(b *testing.B, storeType string) {
 		return
 	}
 	defer os.RemoveAll("test.db")
-	ips := ipset.New()
-	for i := 0; i < b.N; i++ {
-		ips.AddString(loggen.RandomIPv4())
+	for doc := 0; doc < 24; doc++ {
+		ips := ipset.New()
+		for i := 0; i < b.N; i++ {
+			ips.AddString(loggen.PartiallyRandomIPv4(2))
+		}
+		mystore.AddDocument(fmt.Sprintf("test-%d.txt", doc), *ips)
 	}
-	mystore.AddDocument("test.txt", *ips)
 }
 
 func BenchmarkStoreLeveldb(b *testing.B) {
