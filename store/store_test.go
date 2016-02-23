@@ -89,14 +89,14 @@ func TestLeveldb(t *testing.T) {
 
 }
 
-func runStoreBench(b *testing.B, storeType string) {
+func runStoreBench(b *testing.B, storeType string, documents int) {
 	mystore, err := NewStore(storeType, "test.db")
 	if err != nil {
 		b.Error(err)
 		return
 	}
 	defer os.RemoveAll("test.db")
-	for doc := 0; doc < 24; doc++ {
+	for doc := 0; doc < documents; doc++ {
 		ips := ipset.New()
 		for i := 0; i < b.N; i++ {
 			ips.AddString(loggen.PartiallyRandomIPv4(2))
@@ -105,6 +105,12 @@ func runStoreBench(b *testing.B, storeType string) {
 	}
 }
 
-func BenchmarkStoreLeveldb(b *testing.B) {
-	runStoreBench(b, "leveldb")
+func BenchmarkStoreLeveldbDocs1(b *testing.B) {
+	runStoreBench(b, "leveldb", 1)
+}
+func BenchmarkStoreLeveldbDocs24(b *testing.B) {
+	runStoreBench(b, "leveldb", 24)
+}
+func BenchmarkStoreLeveldbDocs720(b *testing.B) {
+	runStoreBench(b, "leveldb", 720)
 }
