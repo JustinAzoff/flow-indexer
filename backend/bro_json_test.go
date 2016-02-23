@@ -1,7 +1,10 @@
 package backend
 
 import (
+	"bytes"
 	"testing"
+
+	"github.com/JustinAzoff/flow-indexer/loggen"
 )
 
 var expectedBroJSONOutput = []string{}
@@ -22,8 +25,20 @@ func TestBroJSONExtractIps(t *testing.T) {
 	t.Logf("%v\n", ips.Count())
 }
 
+var testRandomJSONBroLogBytes []byte
+
+func init() {
+	testRandomJSONBroLogBytes = loggen.RandomJSONBroLog(1000)
+}
+
 func BenchmarkBroJSONExtract(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ExtractIps("bro_json", "test_data/bro_conn.log.json.gz")
+	}
+}
+
+func BenchmarkBroJSONExtractRandom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ExtractIpsReader("bro", bytes.NewBuffer(testRandomJSONBroLogBytes))
 	}
 }

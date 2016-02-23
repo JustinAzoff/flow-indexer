@@ -25,13 +25,17 @@ func NewBackend(backendType string) Backend {
 }
 
 func ExtractIps(backend string, filename string) (*ipset.Set, error) {
-	ips := ipset.New()
 	reader, err := OpenDecompress(filename)
 	if err != nil {
 		return nil, err
 	}
 	defer reader.Close()
+	return ExtractIpsReader(backend, reader)
+}
+
+func ExtractIpsReader(backend string, reader io.Reader) (*ipset.Set, error) {
+	ips := ipset.New()
 	b := NewBackend(backend)
-	_, err = b.ExtractIps(reader, ips)
+	_, err := b.ExtractIps(reader, ips)
 	return ips, err
 }

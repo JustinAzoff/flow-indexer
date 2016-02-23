@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -25,5 +26,11 @@ func TestSyslogExtractIps(t *testing.T) {
 func BenchmarkSyslogExtract(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ExtractIps("syslog", "test_data/bro_conn_some_v6.log.gz")
+	}
+}
+
+func BenchmarkSyslogExtractRandom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ExtractIpsReader("bro", bytes.NewBuffer(testRandomASCIIBroLogBytes))
 	}
 }

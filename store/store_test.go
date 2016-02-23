@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
+	"github.com/JustinAzoff/flow-indexer/loggen"
 )
 
 func makeIps(ss []string) []net.IP {
@@ -86,4 +87,22 @@ func TestLeveldb(t *testing.T) {
 	defer os.RemoveAll("test.db")
 	runTest(t, mystore)
 
+}
+
+func runStoreBench(b *testing.B, storeType string) {
+	mystore, err := NewStore(storeType, "test.db")
+	if err != nil {
+		b.Error(err)
+		return
+	}
+	defer os.RemoveAll("test.db")
+	ips := ipset.New()
+	for i := 0; i < b.N; i++ {
+		ips.AddString(loggen.RandomIPv4())
+	}
+	mystore.AddDocument("test.txt", *ips)
+}
+
+func BenchmarkStoreLeveldb(b *testing.B) {
+	runStoreBench(b, "leveldb")
 }
