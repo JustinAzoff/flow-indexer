@@ -98,10 +98,12 @@ func runStoreBench(b *testing.B, storeType string, documents int) {
 	defer os.RemoveAll("test.db")
 	for n := 0; n < b.N; n++ {
 		for doc := 0; doc < documents; doc++ {
+			b.StopTimer()
 			ips := ipset.New()
 			for i := 0; i < 30000; i++ {
 				ips.AddString(loggen.PartiallyRandomIPv4(2))
 			}
+			b.StartTimer()
 			mystore.AddDocument(fmt.Sprintf("test-%d-%d.txt", doc, n), *ips)
 		}
 	}
