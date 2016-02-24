@@ -39,6 +39,6 @@ func BenchmarkBroJSONExtract(b *testing.B) {
 
 func BenchmarkBroJSONExtractRandom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ExtractIpsReader("bro", bytes.NewBuffer(testRandomJSONBroLogBytes))
+		ExtractIpsReader("bro_json", bytes.NewBuffer(testRandomJSONBroLogBytes))
 	}
 }
