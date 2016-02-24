@@ -33,12 +33,12 @@ func init() {
 
 func BenchmarkBroExtract(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ExtractIpsReader("bro", bytes.NewBuffer(testRandomASCIIBroLogBytes))
+		ExtractIps("bro", "test_data/bro_conn.log.gz")
 	}
 }
 
 func BenchmarkBroExtractRandom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ExtractIps("bro", "test_data/bro_conn.log.gz")
+		ExtractIpsReader("bro", bytes.NewBuffer(testRandomASCIIBroLogBytes))
 	}
 }
