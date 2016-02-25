@@ -124,11 +124,11 @@ func (c *MsgpackDeltasCodec) ReadFrom(r io.Reader) error {
 	return nil
 }
 func (c *MsgpackDeltasCodec) FromBytes(b []byte) error {
-	_, err := c.encodedDocs.UnmarshalMsg(b)
+	_, err := c.docs.UnmarshalMsg(b)
 	if err != nil {
 		return err
 	}
-	c.docs = deltaDecode(c.encodedDocs)
+	deltaDecode(c.docs)
 	return nil
 }
 
@@ -163,12 +163,10 @@ func deltaEncode(docs DocumentList) DocumentList {
 	}
 	return encoded
 }
-func deltaDecode(docs DocumentList) DocumentList {
-	decoded := make(DocumentList, len(docs))
+func deltaDecode(docs DocumentList) {
 	var last DocumentID
 	for i, val := range docs {
-		decoded[i] = val + last
-		last = decoded[i]
+		docs[i] = val + last
+		last = docs[i]
 	}
-	return decoded
 }
