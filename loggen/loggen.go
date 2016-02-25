@@ -44,6 +44,7 @@ func RandomJSONBroLog(lines int) []byte {
 	buf := bytes.NewBuffer([]byte{})
 	for i := 0; i < lines; i++ {
 		fmt.Fprintf(buf, jsTemplate, RandomIPv4(), RandomIPv4())
+		fmt.Fprint(buf, "\n")
 	}
 	return buf.Bytes()
 }
