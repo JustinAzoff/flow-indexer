@@ -10,11 +10,14 @@ import (
 
 type Codec interface {
 	AddID(DocumentID) error
-	ReadFrom(io.Reader) error
-	WriteTo(io.Writer) error
-	FromBytes([]byte) error
-	Bytes() ([]byte, error)
 	Documents() DocumentList
+	Reset()
+
+	ReadFrom(io.Reader) error
+	FromBytes([]byte) error
+	WriteTo(io.Writer) error
+	Bytes() ([]byte, error)
+
 	String() string
 }
 
@@ -28,6 +31,9 @@ func NewBitsetCodec() *BitsetCodec {
 	return &BitsetCodec{bs: bs}
 }
 
+func (c *BitsetCodec) Reset() {
+	c.bs.ClearAll()
+}
 func (c *BitsetCodec) String() string {
 	return "BitsetCodec"
 }
@@ -107,6 +113,10 @@ func (c *MsgpackCodec) Documents() DocumentList {
 	return c.docs
 }
 
+func (c *MsgpackCodec) Reset() {
+	c.docs = c.docs[:0]
+}
+
 type MsgpackDeltasCodec struct {
 	docs    DocumentList
 	encoded bool
@@ -155,6 +165,11 @@ func (c *MsgpackDeltasCodec) Bytes() ([]byte, error) {
 func (c *MsgpackDeltasCodec) Documents() DocumentList {
 	c.decode()
 	return c.docs
+}
+
+func (c *MsgpackDeltasCodec) Reset() {
+	c.docs = c.docs[:0]
+	c.encoded = false
 }
 
 func (c *MsgpackDeltasCodec) encode() {
