@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 
+	"github.com/tinylib/msgp/msgp"
 	"github.com/willf/bitset"
-	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
 type Codec interface {
@@ -69,7 +69,7 @@ func (c *BitsetCodec) Documents() []int {
 
 type MsgpackCodec struct {
 	buffer *[]byte
-	ints   []int
+	ints   Intlist
 }
 
 func NewMsgpackCodec() *MsgpackCodec {
@@ -84,9 +84,7 @@ func (c *MsgpackCodec) ReadFrom(r io.Reader) error {
 	return nil
 }
 func (c *MsgpackCodec) FromBytes(b []byte) error {
-	var ints []int
-	err := msgpack.Unmarshal(b, &ints)
-	c.ints = ints
+	_, err := c.ints.UnmarshalMsg(b)
 	return err
 }
 
@@ -96,10 +94,13 @@ func (c *MsgpackCodec) AddID(documentID int) error {
 }
 
 func (c *MsgpackCodec) WriteTo(w io.Writer) error {
-	return msgpack.NewEncoder(w).Encode(c.ints)
+	mw := msgp.NewWriter(w)
+	err := c.ints.EncodeMsg(mw)
+	mw.Flush()
+	return err
 }
 func (c *MsgpackCodec) Bytes() ([]byte, error) {
-	b, err := msgpack.Marshal(c.ints)
+	b, err := c.ints.MarshalMsg([]byte{})
 	return b, err
 }
 
