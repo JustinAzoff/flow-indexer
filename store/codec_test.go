@@ -43,7 +43,7 @@ func TestCodec(t *testing.T) {
 	runCodecTest(t, func() Codec { return NewMsgpackCodec() })
 }
 
-func BenchmarkBitsecCodec(b *testing.B) {
+func BenchmarkBitsetCodec(b *testing.B) {
 	runCodecBench(b, func() Codec { return NewBitsetCodec() })
 }
 func BenchmarkMsgpackCodec(b *testing.B) {
