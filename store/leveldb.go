@@ -20,6 +20,7 @@ type LevelDBStore struct {
 	filename string
 	db       *leveldb.DB
 	batch    *leveldb.Batch
+	codec    Codec
 }
 
 func NewLevelDBStore(filename string) (IpStore, error) {
@@ -38,7 +39,7 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	newStore := &LevelDBStore{db: db, batch: nil, filename: filename}
+	newStore := &LevelDBStore{db: db, batch: nil, filename: filename, codec: NewMsgpackDeltasCodec()}
 	newStore.fixDocId()
 	return newStore, nil
 }
@@ -146,14 +147,15 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 		return nil, err
 	}
 	bs := bitset.New(8)
-	tmpbs := bitset.New(8)
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
 		if bytes.HasPrefix(iter.Key(), docKeyPrefix) {
 			continue
 		}
-		tmpbs.ReadFrom(bytes.NewBuffer(iter.Value()))
-		bs = bs.Union(tmpbs)
+		ls.codec.FromBytes(iter.Value())
+		for _, id := range ls.codec.Documents() {
+			bs.Set(uint(id))
+		}
 	}
 	iter.Release()
 	err = iter.Error()
@@ -175,7 +177,10 @@ func (ls *LevelDBStore) QueryStringIP(ip string) ([]string, error) {
 		return docs, nil
 	}
 	bs := bitset.New(8)
-	bs.ReadFrom(bytes.NewBuffer(v))
+	ls.codec.FromBytes(v)
+	for _, id := range ls.codec.Documents() {
+		bs.Set(uint(id))
+	}
 	return ls.bitsetToDocs(bs)
 }
 
@@ -235,21 +240,21 @@ func (ls *LevelDBStore) setDocId(filename string, id uint64) {
 }
 
 func (ls *LevelDBStore) addIP(id uint64, k string) error {
-	bs := bitset.New(8)
 	v, err := ls.db.Get([]byte(k), nil)
 	if err != nil && err != leveldb.ErrNotFound {
 		return err
 	}
 	if err != leveldb.ErrNotFound {
-		bs.ReadFrom(bytes.NewBuffer(v))
+		ls.codec.FromBytes(v)
+	} else {
+		ls.codec.Reset()
 	}
-	bs.Set(uint(id))
+	ls.codec.AddID(DocumentID(id))
 
-	buffer := bytes.NewBuffer(make([]byte, 0, bs.BinaryStorageSize()))
-	_, err = bs.WriteTo(buffer)
+	bytes, err := ls.codec.Bytes()
 	if err != nil {
 		return err
 	}
-	ls.batch.Put([]byte(k), buffer.Bytes())
+	ls.batch.Put([]byte(k), bytes)
 	return nil
 }
