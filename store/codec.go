@@ -9,12 +9,12 @@ import (
 )
 
 type Codec interface {
-	AddID(documentID int) error
+	AddID(DocumentID) error
 	ReadFrom(io.Reader) error
 	WriteTo(io.Writer) error
 	FromBytes([]byte) error
 	Bytes() ([]byte, error)
-	Documents() []int
+	Documents() DocumentList
 	String() string
 }
 
@@ -41,8 +41,8 @@ func (c *BitsetCodec) FromBytes(b []byte) error {
 	return nil
 }
 
-func (c *BitsetCodec) AddID(documentID int) error {
-	c.bs.Set(uint(documentID))
+func (c *BitsetCodec) AddID(id DocumentID) error {
+	c.bs.Set(uint(id))
 	return nil
 }
 
@@ -59,17 +59,16 @@ func (c *BitsetCodec) Bytes() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (c *BitsetCodec) Documents() []int {
-	var docs []int
+func (c *BitsetCodec) Documents() DocumentList {
+	var docs DocumentList
 	for i, e := c.bs.NextSet(0); e; i, e = c.bs.NextSet(i + 1) {
-		docs = append(docs, int(i))
+		docs = append(docs, DocumentID(i))
 	}
 	return docs
 }
 
 type MsgpackCodec struct {
-	buffer *[]byte
-	ints   Intlist
+	docs DocumentList
 }
 
 func NewMsgpackCodec() *MsgpackCodec {
@@ -84,26 +83,92 @@ func (c *MsgpackCodec) ReadFrom(r io.Reader) error {
 	return nil
 }
 func (c *MsgpackCodec) FromBytes(b []byte) error {
-	_, err := c.ints.UnmarshalMsg(b)
+	_, err := c.docs.UnmarshalMsg(b)
 	return err
 }
 
-func (c *MsgpackCodec) AddID(documentID int) error {
-	c.ints = append(c.ints, documentID)
+func (c *MsgpackCodec) AddID(id DocumentID) error {
+	c.docs = append(c.docs, id)
 	return nil
 }
 
 func (c *MsgpackCodec) WriteTo(w io.Writer) error {
 	mw := msgp.NewWriter(w)
-	err := c.ints.EncodeMsg(mw)
+	err := c.docs.EncodeMsg(mw)
 	mw.Flush()
 	return err
 }
 func (c *MsgpackCodec) Bytes() ([]byte, error) {
-	b, err := c.ints.MarshalMsg([]byte{})
+	b, err := c.docs.MarshalMsg([]byte{})
 	return b, err
 }
 
-func (c *MsgpackCodec) Documents() []int {
-	return c.ints
+func (c *MsgpackCodec) Documents() DocumentList {
+	return c.docs
+}
+
+type MsgpackDeltasCodec struct {
+	docs        DocumentList
+	encodedDocs DocumentList
+}
+
+func NewMsgpackDeltasCodec() *MsgpackDeltasCodec {
+	return &MsgpackDeltasCodec{}
+}
+
+func (c *MsgpackDeltasCodec) String() string {
+	return "MsgpackDeltasCodec"
+}
+
+func (c *MsgpackDeltasCodec) ReadFrom(r io.Reader) error {
+	return nil
+}
+func (c *MsgpackDeltasCodec) FromBytes(b []byte) error {
+	_, err := c.encodedDocs.UnmarshalMsg(b)
+	if err != nil {
+		return err
+	}
+	c.docs = deltaDecode(c.encodedDocs)
+	return nil
+}
+
+func (c *MsgpackDeltasCodec) AddID(id DocumentID) error {
+	c.docs = append(c.docs, id)
+	return nil
+}
+
+func (c *MsgpackDeltasCodec) WriteTo(w io.Writer) error {
+	mw := msgp.NewWriter(w)
+	c.encodedDocs = deltaEncode(c.docs)
+	err := c.encodedDocs.EncodeMsg(mw)
+	mw.Flush()
+	return err
+}
+func (c *MsgpackDeltasCodec) Bytes() ([]byte, error) {
+	c.encodedDocs = deltaEncode(c.docs)
+	b, err := c.encodedDocs.MarshalMsg([]byte{})
+	return b, err
+}
+
+func (c *MsgpackDeltasCodec) Documents() DocumentList {
+	return c.docs
+}
+
+func deltaEncode(docs DocumentList) DocumentList {
+	encoded := make(DocumentList, len(docs))
+	var last DocumentID
+	for i, val := range docs {
+		encoded[i] = val - last
+		last = val
+	}
+	return encoded
+}
+func deltaDecode(docs DocumentList) DocumentList {
+	decoded := make(DocumentList, len(docs))
+	var last DocumentID
+	for i, val := range docs {
+		decoded[i] = val + last
+		last = decoded[i]
+	}
+	return decoded
 }

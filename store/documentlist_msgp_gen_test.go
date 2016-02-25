@@ -11,8 +11,8 @@ import (
 	"github.com/tinylib/msgp/msgp"
 )
 
-func TestMarshalUnmarshalIntlist(t *testing.T) {
-	v := Intlist{}
+func TestMarshalUnmarshalDocumentList(t *testing.T) {
+	v := DocumentList{}
 	bts, err := v.MarshalMsg(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -34,8 +34,8 @@ func TestMarshalUnmarshalIntlist(t *testing.T) {
 	}
 }
 
-func BenchmarkMarshalMsgIntlist(b *testing.B) {
-	v := Intlist{}
+func BenchmarkMarshalMsgDocumentList(b *testing.B) {
+	v := DocumentList{}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -43,8 +43,8 @@ func BenchmarkMarshalMsgIntlist(b *testing.B) {
 	}
 }
 
-func BenchmarkAppendMsgIntlist(b *testing.B) {
-	v := Intlist{}
+func BenchmarkAppendMsgDocumentList(b *testing.B) {
+	v := DocumentList{}
 	bts := make([]byte, 0, v.Msgsize())
 	bts, _ = v.MarshalMsg(bts[0:0])
 	b.SetBytes(int64(len(bts)))
@@ -55,8 +55,8 @@ func BenchmarkAppendMsgIntlist(b *testing.B) {
 	}
 }
 
-func BenchmarkUnmarshalIntlist(b *testing.B) {
-	v := Intlist{}
+func BenchmarkUnmarshalDocumentList(b *testing.B) {
+	v := DocumentList{}
 	bts, _ := v.MarshalMsg(nil)
 	b.ReportAllocs()
 	b.SetBytes(int64(len(bts)))
@@ -69,8 +69,8 @@ func BenchmarkUnmarshalIntlist(b *testing.B) {
 	}
 }
 
-func TestEncodeDecodeIntlist(t *testing.T) {
-	v := Intlist{}
+func TestEncodeDecodeDocumentList(t *testing.T) {
+	v := DocumentList{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 
@@ -79,7 +79,7 @@ func TestEncodeDecodeIntlist(t *testing.T) {
 		t.Logf("WARNING: Msgsize() for %v is inaccurate", v)
 	}
 
-	vn := Intlist{}
+	vn := DocumentList{}
 	err := msgp.Decode(&buf, &vn)
 	if err != nil {
 		t.Error(err)
@@ -93,8 +93,8 @@ func TestEncodeDecodeIntlist(t *testing.T) {
 	}
 }
 
-func BenchmarkEncodeIntlist(b *testing.B) {
-	v := Intlist{}
+func BenchmarkEncodeDocumentList(b *testing.B) {
+	v := DocumentList{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 	b.SetBytes(int64(buf.Len()))
@@ -107,8 +107,8 @@ func BenchmarkEncodeIntlist(b *testing.B) {
 	en.Flush()
 }
 
-func BenchmarkDecodeIntlist(b *testing.B) {
-	v := Intlist{}
+func BenchmarkDecodeDocumentList(b *testing.B) {
+	v := DocumentList{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 	b.SetBytes(int64(buf.Len()))

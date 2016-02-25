@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-var ids = []int{1, 2, 3, 5, 8, 13, 21}
-var expectIDs = []int{0, 1, 2, 3, 5, 8, 13, 21}
+var ids = DocumentList{1, 2, 3, 5, 8, 13, 21}
+var expectIDs = DocumentList{0, 1, 2, 3, 5, 8, 13, 21}
 
 func runCodecTest(t *testing.T, codecFactory func() Codec) {
 	c := codecFactory()
@@ -18,7 +18,7 @@ func runCodecTest(t *testing.T, codecFactory func() Codec) {
 	}
 	resultDocs := c.Documents()
 	if !reflect.DeepEqual(expectIDs, resultDocs) {
-		t.Errorf("codec(%s)=> %#v, want %#v", c, expectIDs, resultDocs)
+		t.Errorf("codec(%s)=> %v, want %v", c, resultDocs, expectIDs)
 	}
 
 }
@@ -41,6 +41,7 @@ func TestCodec(t *testing.T) {
 	//runCodecTest(t, NewMsgpackCodec)
 	runCodecTest(t, func() Codec { return NewBitsetCodec() })
 	runCodecTest(t, func() Codec { return NewMsgpackCodec() })
+	runCodecTest(t, func() Codec { return NewMsgpackDeltasCodec() })
 }
 
 func BenchmarkBitsetCodec(b *testing.B) {
@@ -48,4 +49,8 @@ func BenchmarkBitsetCodec(b *testing.B) {
 }
 func BenchmarkMsgpackCodec(b *testing.B) {
 	runCodecBench(b, func() Codec { return NewMsgpackCodec() })
+}
+
+func BenchmarkMsgpackDeltaCodec(b *testing.B) {
+	runCodecBench(b, func() Codec { return NewMsgpackDeltasCodec() })
 }
