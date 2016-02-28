@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -260,6 +261,21 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 	}
 	stat.Hits = len(docs)
 	return stat, nil
+}
+
+func (i *Indexer) Dump(query string, writer io.Writer) error {
+	docs, err := i.QueryString(query)
+	if err != nil {
+		return err
+	}
+
+	for _, fn := range docs {
+		err = backend.FilterIPs(i.config.Backend, fn, query, writer)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func RunIndexAll(config string) {

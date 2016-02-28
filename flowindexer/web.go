@@ -66,11 +66,36 @@ func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 	}
 	json.NewEncoder(w).Encode(stats)
 }
+func (fh *fiHandler) handleDump(w http.ResponseWriter, req *http.Request) {
+	indexerParam := req.FormValue("i")
+	query := req.FormValue("q")
+	if indexerParam == "" {
+		http.Error(w, "Missing parameter: i", http.StatusBadRequest)
+		return
+	}
+	if query == "" {
+		http.Error(w, "Missing parameter: q", http.StatusBadRequest)
+		return
+	}
+
+	indexer, err := fh.fi.GetIndexer(indexerParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = indexer.Dump(query, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 
 func startWeb(fi *FlowIndexer) {
 	fh := &fiHandler{fi: fi}
 	http.HandleFunc("/search", fh.handleSearch)
 	http.HandleFunc("/stats", fh.handleStats)
+	http.HandleFunc("/dump", fh.handleDump)
 
 	bind := fi.config.HTTP.Bind
 	log.Printf("Listening on %q\n", bind)

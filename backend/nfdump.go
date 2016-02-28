@@ -44,6 +44,9 @@ func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 	err = cmd.Wait()
 	return lines, err
 }
+func (b NFDUMPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
+	return nil
+}
 
 func init() {
 	RegisterBackend("nfdump", NFDUMPBackend{})

@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"regexp"
+	"strings"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
@@ -55,6 +56,24 @@ func (b SyslogBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 		}
 	}
 	return lines, nil
+}
+
+func (b SyslogBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
+	br := bufio.NewReader(reader)
+
+	for {
+		line, err := br.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if strings.Index(line, query) != -1 {
+			io.WriteString(writer, line)
+		}
+	}
+	return nil
 }
 
 func init() {

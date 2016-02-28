@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"strings"
 
@@ -31,6 +32,26 @@ func (b BroBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error)
 		}
 	}
 	return lines, nil
+}
+
+func (b BroBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
+	br := bufio.NewReader(reader)
+
+	realQuery := fmt.Sprintf("\t%s\t", query)
+
+	for {
+		line, err := br.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if strings.Index(line, realQuery) != -1 {
+			io.WriteString(writer, line)
+		}
+	}
+	return nil
 }
 
 func init() {
