@@ -71,7 +71,9 @@ func (b BroJSONBackend) Filter(reader io.Reader, query string, writer io.Writer)
 			return err
 		}
 		if strings.Index(line, realQuery) != -1 {
-			io.WriteString(writer, line)
+			if _, err = io.WriteString(writer, line); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
