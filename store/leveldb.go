@@ -84,7 +84,10 @@ func (ls *LevelDBStore) AddDocument(filename string, ips ipset.Set) error {
 	ls.setDocId(filename, nextID)
 	for _, ip := range ips.SortedStrings() {
 		//fmt.Printf("Add %#v to document\n", ip)
-		ls.addIP(nextID, ip)
+		err = ls.addIP(nextID, ip)
+		if err != nil {
+			return err
+		}
 	}
 	err = ls.db.Write(ls.batch, nil)
 	ls.batch = nil
