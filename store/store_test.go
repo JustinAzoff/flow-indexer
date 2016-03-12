@@ -26,6 +26,7 @@ var basicSearchTable = []struct {
 }{
 	{"1.2.3.4/24", []string{"/log/1.txt", "/log/2.txt"}},
 	{"2.0.0.0/8", []string{"/log/2.txt"}},
+	{"102:304::1", []string{"/log/3.txt"}},
 }
 
 var basicExpandCidrTable = []struct {
@@ -35,6 +36,9 @@ var basicExpandCidrTable = []struct {
 	{"1.2.3.0/24", makeIps([]string{"1.2.3.1", "1.2.3.2", "1.2.3.3", "1.2.3.4"})},
 	{"1.0.0.0/8", makeIps([]string{"1.2.3.1", "1.2.3.2", "1.2.3.3", "1.2.3.4"})},
 	{"2.0.0.0/8", makeIps([]string{"2.0.0.2", "2.0.0.3"})},
+
+	//Once convered, this is starts with \x01\x02\x03\x04 in hex
+	{"102:304::/8", makeIps([]string{"102:304::1"})},
 
 	//'doc:' converted to an IP is 100.111.99.58
 	{"100.111.99.0/24", []net.IP{}},
@@ -56,13 +60,17 @@ func runTest(t *testing.T, s IpStore) {
 	ips.AddString("2.0.0.3")
 	s.AddDocument("/log/2.txt", *ips)
 
+	ips = ipset.New()
+	ips.AddString("102:304::1")
+	s.AddDocument("/log/3.txt", *ips)
+
 	for _, tt := range basicSearchTable {
 		matches, err := s.QueryString(tt.query)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(matches, tt.docs) {
-			t.Errorf("store.QueryString => %#v, want %#v", matches, tt.docs)
+			t.Errorf("store.QueryString(%s) => %#v, want %#v", tt.query, matches, tt.docs)
 		}
 	}
 
@@ -72,7 +80,7 @@ func runTest(t *testing.T, s IpStore) {
 			t.Fatal(err)
 		}
 		if fmt.Sprintf("%v", matches) != fmt.Sprintf("%v", tt.ips) {
-			t.Errorf("store.QueryString => %v, want %v", matches, tt.ips)
+			t.Errorf("store.ExpandCIDR(%s) => %v, want %v", tt.query, matches, tt.ips)
 		}
 	}
 

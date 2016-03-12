@@ -125,6 +125,10 @@ func (ls *LevelDBStore) ExpandCIDR(ip string) ([]net.IP, error) {
 		if bytes.HasPrefix(key, docKeyPrefix) {
 			continue
 		}
+		if len(key) != len(start) {
+			//Ensure the matched keys are in the right ip family
+			continue
+		}
 		keycopy := make([]byte, len(key))
 		copy(keycopy, key)
 		ip := net.IP(keycopy)
@@ -152,7 +156,12 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 	tmpbs := bitset.New(8)
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
-		if bytes.HasPrefix(iter.Key(), docKeyPrefix) {
+		key := iter.Key()
+		if bytes.HasPrefix(key, docKeyPrefix) {
+			continue
+		}
+		if len(key) != len(start) {
+			//Ensure the matched keys are in the right ip family
 			continue
 		}
 		tmpbs.ReadFrom(bytes.NewBuffer(iter.Value()))
