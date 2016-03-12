@@ -55,8 +55,8 @@ func (set *Set) Count() int {
 
 func (set *Set) SortedStrings() []string {
 	strings := make([]string, set.Count())
-	var i int = 0
-	for ip, _ := range set.store {
+	var i int
+	for ip := range set.store {
 		strings[i] = ip
 		i++
 	}
