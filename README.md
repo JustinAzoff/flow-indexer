@@ -36,7 +36,7 @@ Create configuration
 The indexer configuration is as follows:
 
 * name - The name of the indexer. Keep this short and lowercase, as you will use it as an http query param.
-* backend - The backend log ip extractor to use. Choices: bro, bro\_json, syslog.
+* backend - The backend log ip extractor to use. Choices: bro, bro\_json, nfdump, syslog.
 * file\_glob - The shell globbing pattern that should match all of your log files.
 * filename\_to\_database\_regex - A regular expression applied to each filename used to extract information used to name the database.
 * database\_root - Where databases will be written to.  Should be indexer specific.
