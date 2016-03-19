@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/JustinAzoff/flow-indexer/backend"
+	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/JustinAzoff/flow-indexer/store"
 )
 
@@ -247,6 +249,21 @@ func (i *Indexer) QueryString(query string) ([]string, error) {
 		documents = append(documents, docs...)
 	}
 	return documents, nil
+}
+
+func (i *Indexer) ExpandCIDR(query string) ([]net.IP, error) {
+	allips := ipset.New()
+
+	for _, store := range i.stores {
+		ips, err := store.ExpandCIDR(query)
+		if err != nil {
+			return []net.IP{}, err
+		}
+		for _, ip := range ips {
+			allips.AddIP(ip)
+		}
+	}
+	return allips.SortedIPs(), nil
 }
 
 func (i *Indexer) Stats(query string) (queryStat, error) {

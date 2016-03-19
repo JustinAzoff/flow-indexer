@@ -20,16 +20,20 @@ func New() *Set {
 }
 
 //IPToByteString converts an ip address to a byte array
-func IPToByteString(s string) (string, error) {
-	ip := net.ParseIP(s)
-	if ip == nil {
-		return "", fmt.Errorf("Invalid IP Address %s", s)
-	}
-
+func IPToByteString(ip net.IP) (string, error) {
 	if ip4 := ip.To4(); ip4 != nil {
 		ip = ip4
 	}
 	return string([]byte(ip)), nil
+}
+
+//IPToByteString converts an ip address in string form to a byte array
+func IPStringToByteString(s string) (string, error) {
+	ip := net.ParseIP(s)
+	if ip == nil {
+		return "", fmt.Errorf("Invalid IP Address %s", s)
+	}
+	return IPToByteString(ip)
 }
 
 //CIDRToByteStrings converts a cidr block to its starting and ending addresses
@@ -50,7 +54,17 @@ func CIDRToByteStrings(s string) (string, string, error) {
 
 //AddString adds a single ip address in string form into the Set
 func (set *Set) AddString(s string) error {
-	keyString, err := IPToByteString(s)
+	keyString, err := IPStringToByteString(s)
+	if err != nil {
+		return err
+	}
+	set.store[keyString] = struct{}{}
+	return nil
+}
+
+//AddIP adds a single ip address in net.IP form into the Set
+func (set *Set) AddIP(ip net.IP) error {
+	keyString, err := IPToByteString(ip)
 	if err != nil {
 		return err
 	}
@@ -73,4 +87,16 @@ func (set *Set) SortedStrings() []string {
 	}
 	sort.Strings(strings)
 	return strings
+}
+
+//SortedIPs returns all of the ip addresses in the Set in sorted order as IP objects
+func (set *Set) SortedIPs() []net.IP {
+	strings := set.SortedStrings()
+	ips := make([]net.IP, len(strings))
+	var i int
+	for _, ip := range strings {
+		ips[i] = net.IP(ip)
+		i++
+	}
+	return ips
 }

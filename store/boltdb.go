@@ -106,7 +106,7 @@ func DocumentIDToName(b *bolt.Bucket, id uint64) string {
 }
 
 func (bs *BoltStore) QueryString(ip string) {
-	key, err := ipset.IPToByteString(ip)
+	key, err := ipset.IPStringToByteString(ip)
 	if err != nil {
 		fmt.Println(err)
 		return

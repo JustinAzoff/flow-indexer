@@ -178,7 +178,7 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 
 func (ls *LevelDBStore) QueryStringIP(ip string) ([]string, error) {
 	var docs []string
-	key, err := ipset.IPToByteString(ip)
+	key, err := ipset.IPStringToByteString(ip)
 	if err != nil {
 		return nil, err
 	}
