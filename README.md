@@ -1,3 +1,5 @@
+Flow Indexer [![Build Status](https://travis-ci.org/JustinAzoff/flow-indexer.svg?branch=master)](https://travis-ci.org/JustinAzoff/flow-indexer)
+
     flow-indexer indexes flows
 
     Usage: 
