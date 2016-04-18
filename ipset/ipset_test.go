@@ -2,6 +2,8 @@ package ipset
 
 import (
 	"testing"
+
+	"github.com/JustinAzoff/flow-indexer/loggen"
 )
 
 var basicAddStringTests = []struct {
@@ -54,4 +56,20 @@ func TestCIDRToByteStrings(t *testing.T) {
 			t.Errorf("Ipset.CIDRToByteStrings(%#v) => end is %#v, want %#v", tt.in, e, tt.endout)
 		}
 	}
+}
+
+func doBenchmarkAddingRandomN(b *testing.B, n int) {
+	ips := New()
+	for i := 0; i < b.N; i++ {
+		ips.AddString(loggen.PartiallyRandomIPv4(n))
+	}
+}
+func BenchmarkAddingRandom1(b *testing.B) {
+	doBenchmarkAddingRandomN(b, 1)
+}
+func BenchmarkAddingRandom2(b *testing.B) {
+	doBenchmarkAddingRandomN(b, 2)
+}
+func BenchmarkAddingRandom3(b *testing.B) {
+	doBenchmarkAddingRandomN(b, 3)
 }
