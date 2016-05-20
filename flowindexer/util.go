@@ -24,13 +24,9 @@ func logFilenameToDatabase(filename, filenameToDbRegex, regexReplacement string)
 	return dbString, nil
 }
 
-func logFilenameToTime(filename, filenameToTimeRegex string) (time.Time, error) {
-	re, err := regexp.Compile(filenameToTimeRegex)
-	if err != nil {
-		return time.Now(), err
-	}
-	n1 := re.SubexpNames()
-	r2 := re.FindAllStringSubmatch(filename, -1)[0]
+func logFilenameToTime(filename string, filenameToTimeRegex *regexp.Regexp) (time.Time, error) {
+	n1 := filenameToTimeRegex.SubexpNames()
+	r2 := filenameToTimeRegex.FindAllStringSubmatch(filename, -1)[0]
 
 	md := map[string]string{}
 	for i, n := range r2 {

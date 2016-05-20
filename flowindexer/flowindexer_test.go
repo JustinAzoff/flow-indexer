@@ -1,6 +1,7 @@
 package flowindexer
 
 import (
+	"regexp"
 	"testing"
 	"time"
 )
@@ -42,7 +43,11 @@ var basiclogFilenameToTime = []struct {
 
 func TestLogFilenameToTime(t *testing.T) {
 	for _, tt := range basiclogFilenameToTime {
-		tm, err := logFilenameToTime(tt.filename, tt.regex)
+		re, err := regexp.Compile(tt.regex)
+		if err != nil {
+			t.Error(err)
+		}
+		tm, err := logFilenameToTime(tt.filename, re)
 		if err != nil {
 			t.Error(err)
 		}
