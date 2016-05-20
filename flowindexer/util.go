@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -21,6 +22,38 @@ func logFilenameToDatabase(filename, filenameToDbRegex, regexReplacement string)
 
 	dbString := string(db)
 	return dbString, nil
+}
+
+func logFilenameToTime(filename, filenameToTimeRegex string) (time.Time, error) {
+	re, err := regexp.Compile(filenameToTimeRegex)
+	if err != nil {
+		return time.Now(), err
+	}
+	n1 := re.SubexpNames()
+	r2 := re.FindAllStringSubmatch(filename, -1)[0]
+
+	md := map[string]string{}
+	for i, n := range r2 {
+		md[n1[i]] = n
+	}
+
+	getOrZero := func(key string) int {
+		val, exists := md[key]
+		if !exists {
+			return 0
+		}
+		num, err := strconv.Atoi(val)
+		if err != nil {
+			return 0
+		}
+		return num
+	}
+	year := getOrZero("year")
+	month := time.Month(getOrZero("month"))
+	day := getOrZero("day")
+	hour := getOrZero("hour")
+	minute := getOrZero("minute")
+	return time.Date(year, month, day, hour, minute, 0, 0, time.UTC), nil
 }
 
 func isFileGrowing(filename string) (bool, error) {

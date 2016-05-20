@@ -2,6 +2,7 @@ package flowindexer
 
 import (
 	"testing"
+	"time"
 )
 
 var basiclogFilenameToDatabase = []struct {
@@ -25,6 +26,30 @@ func TestLogFilenameToDatabase(t *testing.T) {
 			t.Errorf("flowindexer.logFilenameToDatabase(%#v) => db is %#v, want %#v", tt.filename, db, tt.database)
 		} else {
 			t.Logf("flowindexer.logFilenameToDatabase(%#v) => %#v", tt.filename, db)
+		}
+	}
+}
+
+var basiclogFilenameToTime = []struct {
+	filename string
+	regex    string
+	tm       time.Time
+}{
+	{"/bro/logs/2016-01-01/conn.10:15:00-11:00:00.log.gz",
+		"logs/(?P<year>\\d\\d\\d\\d)-(?P<month>\\d\\d)-(?P<day>\\d\\d)/\\w+\\.(?P<hour>\\d\\d):(?P<minute>\\d\\d)",
+		time.Date(2016, 1, 1, 10, 15, 0, 0, time.UTC)},
+}
+
+func TestLogFilenameToTime(t *testing.T) {
+	for _, tt := range basiclogFilenameToTime {
+		tm, err := logFilenameToTime(tt.filename, tt.regex)
+		if err != nil {
+			t.Error(err)
+		}
+		if !tt.tm.Equal(tm) {
+			t.Errorf("flowindexer.logFilenameToTime(%#v) => tm is %#v, want %#v", tt.filename, tm, tt.tm)
+		} else {
+			t.Logf("flowindexer.logFilenameToTime(%#v) => %#v", tt.filename, tm)
 		}
 	}
 }
