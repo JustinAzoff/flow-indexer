@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"time"
 
@@ -24,6 +25,7 @@ type indexerConfig struct {
 	FileGlob                string `json:"file_glob"`
 	Store                   string `json:"store"`
 	FilenameToDatabaseRegex string `json:"filename_to_database_regex"`
+	FilenameToTimeRegexp    string `json:"filename_to_time_regex"`
 	DatabaseRoot            string `json:"database_root"`
 	DatabasePath            string `json:"database_path"`
 }
@@ -38,10 +40,11 @@ type Config struct {
 }
 
 type Indexer struct {
-	config           indexerConfig
-	stores           []store.IpStore
-	storeMap         map[string]store.IpStore
-	indexedFilenames map[string]bool
+	config               indexerConfig
+	stores               []store.IpStore
+	storeMap             map[string]store.IpStore
+	indexedFilenames     map[string]bool
+	filenameToTimeRegexp *regexp.Regexp
 }
 
 type FlowIndexer struct {
@@ -53,6 +56,9 @@ type queryStat struct {
 	Hits  int    `json:"hits"`
 	First string `json:"first"`
 	Last  string `json:"last"`
+
+	FirstTime time.Time `json:"first_time"`
+	LastTime  time.Time `json:"last_time"`
 }
 
 func loadConfig(filename string) (Config, error) {
@@ -96,6 +102,9 @@ func NewFlowIndexerFromConfig(cfg Config) *FlowIndexer {
 		indexer := Indexer{config: indexercfg}
 		indexer.storeMap = make(map[string]store.IpStore)
 		indexer.indexedFilenames = make(map[string]bool)
+		if indexercfg.FilenameToTimeRegexp != "" {
+			indexer.filenameToTimeRegexp = regexp.MustCompile(indexercfg.FilenameToTimeRegexp)
+		}
 		indexerMap[indexercfg.Name] = &indexer
 	}
 	return &FlowIndexer{config: cfg, indexers: indexerMap}
@@ -135,6 +144,14 @@ func (i *Indexer) FilenameToDatabaseFilename(filename string) (string, error) {
 		return "", errors.New("Empty string return from logFilenameToDatabase")
 	}
 	return filepath.Join(i.config.DatabaseRoot, db), nil
+}
+
+func (i *Indexer) FilenameToTime(filename string) (time.Time, error) {
+	tm, err := logFilenameToTime(filename, i.filenameToTimeRegexp)
+	if err != nil {
+		return time.Now(), err
+	}
+	return tm, nil
 }
 
 func (i *Indexer) IndexOne(filename string, checkGrowing bool) error {
@@ -275,6 +292,13 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 	if len(docs) > 0 {
 		stat.First = docs[0]
 		stat.Last = docs[len(docs)-1]
+
+		if t, err := i.FilenameToTime(stat.First); err == nil {
+			stat.FirstTime = t
+		}
+		if t, err := i.FilenameToTime(stat.Last); err == nil {
+			stat.LastTime = t
+		}
 	}
 	stat.Hits = len(docs)
 	return stat, nil
