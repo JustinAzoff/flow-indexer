@@ -312,16 +312,17 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 	stat.Hits = len(docs)
 
 	var last string
-	var bh BucketHit
+	var bp *BucketHit //a pointer to a bucket hit
 	for _, doc := range docs {
 		if t, err := i.FilenameToTime(doc); err == nil {
 			bucket := t.Truncate(time.Hour * 24).Format(time.RFC3339)
 			if bucket != last {
-				bh = BucketHit{Bucket: bucket, Hits: 1}
+				bh := BucketHit{Bucket: bucket, Hits: 1}
 				stat.Buckets = append(stat.Buckets, &bh)
 				last = bucket
+				bp = &bh
 			} else {
-				bh.Hits++
+				bp.Hits++
 			}
 		}
 	}
