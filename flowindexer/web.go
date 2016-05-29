@@ -44,6 +44,7 @@ func (fh *fiHandler) handleSearch(w http.ResponseWriter, req *http.Request) {
 func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 	indexerParam := req.FormValue("i")
 	query := req.FormValue("q")
+	bucketInterval := req.FormValue("bucket")
 	if indexerParam == "" {
 		http.Error(w, "Missing parameter: i", http.StatusBadRequest)
 		return
@@ -52,6 +53,9 @@ func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Missing parameter: q", http.StatusBadRequest)
 		return
 	}
+	if bucketInterval == "" {
+		bucketInterval = "month"
+	}
 
 	indexer, err := fh.fi.GetIndexer(indexerParam)
 	if err != nil {
@@ -59,7 +63,7 @@ func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	stats, err := indexer.Stats(query)
+	stats, err := indexer.Stats(query, bucketInterval)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

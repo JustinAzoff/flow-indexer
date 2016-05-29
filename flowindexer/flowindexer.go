@@ -291,7 +291,7 @@ func (i *Indexer) ExpandCIDR(query string) ([]net.IP, error) {
 	return allips.SortedIPs(), nil
 }
 
-func (i *Indexer) Stats(query string) (queryStat, error) {
+func (i *Indexer) Stats(query string, bucketInterval string) (queryStat, error) {
 	var stat = queryStat{}
 	docs, err := i.QueryString(query)
 	sort.Strings(docs)
@@ -315,7 +315,10 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 	var bp *BucketHit //a pointer to a bucket hit
 	for _, doc := range docs {
 		if t, err := i.FilenameToTime(doc); err == nil {
-			bucket := t.Truncate(time.Hour * 24).Format(time.RFC3339)
+			bucket, err := timeToBucket(t, bucketInterval)
+			if err != nil {
+				return stat, err
+			}
 			if bucket != last {
 				bh := BucketHit{Bucket: bucket, Hits: 1}
 				stat.Buckets = append(stat.Buckets, &bh)

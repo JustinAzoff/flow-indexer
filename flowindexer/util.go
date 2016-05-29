@@ -80,3 +80,27 @@ func isFileGrowing(filename string) (bool, error) {
 	}
 	return false, nil
 }
+
+const (
+	hourFmt  = "2006-01-02T15"
+	dayFmt   = "2006-01-02"
+	monthFmt = "2006-01"
+	yearFmt  = "2006"
+)
+
+func timeToBucket(tm time.Time, trunc string) (string, error) {
+	var bucket string
+	switch trunc {
+	case "hour":
+		bucket = tm.Format(hourFmt)
+	case "day":
+		bucket = tm.Format(dayFmt)
+	case "month":
+		bucket = tm.Format(monthFmt)
+	case "year":
+		bucket = tm.Format(yearFmt)
+	default:
+		return bucket, fmt.Errorf("Invalid truncation period: %s", trunc)
+	}
+	return bucket, nil
+}

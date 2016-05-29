@@ -59,6 +59,47 @@ func TestLogFilenameToTime(t *testing.T) {
 	}
 }
 
+var timeToBucketTests = []struct {
+	tm    time.Time
+	trunc string
+	out   string
+}{
+	{
+		time.Date(2016, 2, 3, 10, 15, 0, 0, time.UTC),
+		"hour",
+		"2016-02-03T10",
+	},
+	{
+		time.Date(2016, 2, 3, 10, 15, 0, 0, time.UTC),
+		"day",
+		"2016-02-03",
+	},
+	{
+		time.Date(2016, 2, 3, 10, 15, 0, 0, time.UTC),
+		"month",
+		"2016-02",
+	},
+	{
+		time.Date(2016, 2, 3, 10, 15, 0, 0, time.UTC),
+		"year",
+		"2016",
+	},
+}
+
+func TestTimeToBucket(t *testing.T) {
+	for _, tt := range timeToBucketTests {
+		out, err := timeToBucket(tt.tm, tt.trunc)
+		if err != nil {
+			t.Error(err)
+		}
+		if tt.out != out {
+			t.Errorf("flowindexer.timeToBucket(%q, %#v) => out is %#v, want %#v", tt.tm, tt.trunc, out, tt.out)
+		} else {
+			t.Logf("flowindexer.timeToBucket(%q, %#v) => %#v", tt.tm, tt.trunc, tt.out)
+		}
+	}
+}
+
 var testConfig = []byte(`
 {
     "http": {
