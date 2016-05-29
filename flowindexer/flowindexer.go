@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"sync"
 	"time"
 
@@ -52,6 +53,11 @@ type FlowIndexer struct {
 	config   Config
 }
 
+type BucketHit struct {
+	Bucket string `json:"bucket"`
+	Hits   int    `json:"hits"`
+}
+
 type queryStat struct {
 	Hits  int    `json:"hits"`
 	First string `json:"first"`
@@ -59,6 +65,8 @@ type queryStat struct {
 
 	FirstTime time.Time `json:"first_time"`
 	LastTime  time.Time `json:"last_time"`
+
+	Buckets []*BucketHit `json:"buckets"`
 }
 
 func loadConfig(filename string) (Config, error) {
@@ -286,6 +294,7 @@ func (i *Indexer) ExpandCIDR(query string) ([]net.IP, error) {
 func (i *Indexer) Stats(query string) (queryStat, error) {
 	var stat = queryStat{}
 	docs, err := i.QueryString(query)
+	sort.Strings(docs)
 	if err != nil {
 		return stat, err
 	}
@@ -301,6 +310,22 @@ func (i *Indexer) Stats(query string) (queryStat, error) {
 		}
 	}
 	stat.Hits = len(docs)
+
+	var last string
+	var bh BucketHit
+	for _, doc := range docs {
+		if t, err := i.FilenameToTime(doc); err == nil {
+			bucket := t.Truncate(time.Hour * 24).Format(time.RFC3339)
+			if bucket != last {
+				bh = BucketHit{Bucket: bucket, Hits: 1}
+				stat.Buckets = append(stat.Buckets, &bh)
+				last = bucket
+			} else {
+				bh.Hits++
+			}
+		}
+	}
+
 	return stat, nil
 }
 
