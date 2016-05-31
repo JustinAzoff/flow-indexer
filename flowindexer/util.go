@@ -30,7 +30,11 @@ func logFilenameToTime(filename string, filenameToTimeRegex *regexp.Regexp) (tim
 		return time.Now(), fmt.Errorf("filename_to_time_regex is not set in indexer configuration")
 	}
 	n1 := filenameToTimeRegex.SubexpNames()
-	r2 := filenameToTimeRegex.FindAllStringSubmatch(filename, -1)[0]
+	r2s := filenameToTimeRegex.FindAllStringSubmatch(filename, -1)
+	if len(r2s) == 0 {
+		return time.Now(), fmt.Errorf("filename_to_time_regex did not match %q", filename)
+	}
+	r2 := r2s[0]
 
 	md := map[string]string{}
 	for i, n := range r2 {
