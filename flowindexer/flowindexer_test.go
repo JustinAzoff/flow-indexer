@@ -1,6 +1,7 @@
 package flowindexer
 
 import (
+	"reflect"
 	"regexp"
 	"testing"
 	"time"
@@ -142,7 +143,17 @@ type bucketTest struct {
 	hits   int
 }
 
-func checkBuckets(t *testing.T, which string, stats queryStat, tests []bucketTest) {
+func checkBuckets(t *testing.T, i *Indexer, which string, docs []string, tests []bucketTest) {
+	bp, err := parseBucketParam(which)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	stats, err := i.FilenamesToStats(docs, bp)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	for _, tt := range tests {
 		if stats.Buckets[tt.index].Bucket != tt.bucket {
 			t.Errorf("%s stats.Bucket[%d].Bucket => %q, want %q", which, tt.index, stats.Buckets[tt.index].Bucket, tt.bucket)
@@ -168,7 +179,7 @@ func TestFilenamesToStats(t *testing.T) {
 		t.Error(err)
 	}
 	i := fi.indexers["bro"]
-	stats, err := i.FilenamesToStats(testDocuments, "month", "hour")
+	stats, err := i.FilenamesToStats(testDocuments, bucketParam{"year", "day"})
 	if err != nil {
 		t.Error(err)
 		return
@@ -180,12 +191,30 @@ func TestFilenamesToStats(t *testing.T) {
 		t.Errorf("stats.Last should not be %q", stats.Last)
 	}
 
-	checkBuckets(t, "month/hour", stats, testDocumentsBucketedByMonthHour)
+	checkBuckets(t, i, "month/hour", testDocuments, testDocumentsBucketedByMonthHour)
+	checkBuckets(t, i, "month/day", testDocuments, testDocumentsBucketedByMonthDay)
+}
 
-	stats, err = i.FilenamesToStats(testDocuments, "month", "day")
-	if err != nil {
-		t.Error(err)
-		return
+var parseBucketParamTests = []struct {
+	in  string
+	out bucketParam
+}{
+	{"", bucketParam{"month", "day"}},
+	{"year", bucketParam{"year", "month"}},
+	{"month", bucketParam{"month", "day"}},
+	{"day", bucketParam{"day", "hour"}},
+	{"month/hour", bucketParam{"month", "hour"}},
+	{"year/minute", bucketParam{"year", "minute"}},
+}
+
+func TestParseBucketParam(t *testing.T) {
+
+	for _, tt := range parseBucketParamTests {
+		bp, _ := parseBucketParam(tt.in)
+		if !reflect.DeepEqual(bp, tt.out) {
+			t.Errorf("parseBucketParam(%q) => %#v, want %#v", tt.in, bp, tt.out)
+		}
+
 	}
-	checkBuckets(t, "month/day", stats, testDocumentsBucketedByMonthDay)
+
 }

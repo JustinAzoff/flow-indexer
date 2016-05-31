@@ -53,6 +53,11 @@ type FlowIndexer struct {
 	config   Config
 }
 
+type bucketParam struct {
+	groupby string
+	count   string
+}
+
 type bucketHit struct {
 	Bucket string `json:"bucket"`
 	Hits   int    `json:"hits"`
@@ -286,16 +291,16 @@ func (i *Indexer) ExpandCIDR(query string) ([]net.IP, error) {
 	}
 	return allips.SortedIPs(), nil
 }
-func (i *Indexer) Stats(query string, bucketGroup string, bucketCount string) (queryStat, error) {
+func (i *Indexer) Stats(query string, bp bucketParam) (queryStat, error) {
 	var stat = queryStat{}
 	docs, err := i.QueryString(query)
 	if err != nil {
 		return stat, err
 	}
-	return i.FilenamesToStats(docs, bucketGroup, bucketCount)
+	return i.FilenamesToStats(docs, bp)
 }
 
-func (i *Indexer) FilenamesToStats(docs []string, bucketGroup string, bucketCount string) (queryStat, error) {
+func (i *Indexer) FilenamesToStats(docs []string, buckerparam bucketParam) (queryStat, error) {
 	sort.Strings(docs)
 	var stat = queryStat{}
 	if len(docs) > 0 {
@@ -316,11 +321,11 @@ func (i *Indexer) FilenamesToStats(docs []string, bucketGroup string, bucketCoun
 	var bp *bucketHit //a pointer to a bucket hit
 	for _, doc := range docs {
 		if t, err := i.FilenameToTime(doc); err == nil {
-			bucket, err := timeToBucket(t, bucketGroup)
+			bucket, err := timeToBucket(t, buckerparam.groupby)
 			if err != nil {
 				return stat, err
 			}
-			count, err := timeToBucket(t, bucketCount)
+			count, err := timeToBucket(t, buckerparam.count)
 			if err != nil {
 				return stat, err
 			}

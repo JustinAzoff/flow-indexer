@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -85,15 +86,18 @@ func isFileGrowing(filename string) (bool, error) {
 }
 
 const (
-	hourFmt  = "2006-01-02T15"
-	dayFmt   = "2006-01-02"
-	monthFmt = "2006-01"
-	yearFmt  = "2006"
+	minuteFmt = "2006-01-02T15:04:05"
+	hourFmt   = "2006-01-02T15"
+	dayFmt    = "2006-01-02"
+	monthFmt  = "2006-01"
+	yearFmt   = "2006"
 )
 
 func timeToBucket(tm time.Time, trunc string) (string, error) {
 	var bucket string
 	switch trunc {
+	case "minute":
+		bucket = tm.Format(minuteFmt)
 	case "hour":
 		bucket = tm.Format(hourFmt)
 	case "day":
@@ -106,4 +110,32 @@ func timeToBucket(tm time.Time, trunc string) (string, error) {
 		return bucket, fmt.Errorf("Invalid truncation period: %s", trunc)
 	}
 	return bucket, nil
+}
+
+func parseBucketParam(bucket string) (bucketParam, error) {
+
+	if bucket == "" {
+		return bucketParam{"month", "day"}, nil
+	}
+
+	bp := bucketParam{}
+	parts := strings.Split(bucket, "/")
+	switch len(parts) {
+	case 1:
+		bp.groupby = parts[0]
+		switch bp.groupby {
+		case "year":
+			bp.count = "month"
+		case "month":
+			bp.count = "day"
+		case "day":
+			bp.count = "hour"
+		}
+	case 2:
+		bp.groupby = parts[0]
+		bp.count = parts[1]
+	default:
+		return bp, fmt.Errorf("Invalid bucketing specification %q. Only one / is allowed", bucket)
+	}
+	return bp, nil
 }

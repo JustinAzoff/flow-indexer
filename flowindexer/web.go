@@ -44,8 +44,7 @@ func (fh *fiHandler) handleSearch(w http.ResponseWriter, req *http.Request) {
 func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 	indexerParam := req.FormValue("i")
 	query := req.FormValue("q")
-	bucketGroup := req.FormValue("bucketgroup")
-	bucketCount := req.FormValue("bucketcount")
+	bucket := req.FormValue("bucket")
 	if indexerParam == "" {
 		http.Error(w, "Missing parameter: i", http.StatusBadRequest)
 		return
@@ -54,11 +53,10 @@ func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Missing parameter: q", http.StatusBadRequest)
 		return
 	}
-	if bucketGroup == "" {
-		bucketGroup = "month"
-	}
-	if bucketCount == "" {
-		bucketCount = "day"
+	bp, err := parseBucketParam(bucket)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	indexer, err := fh.fi.GetIndexer(indexerParam)
@@ -67,7 +65,7 @@ func (fh *fiHandler) handleStats(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	stats, err := indexer.Stats(query, bucketGroup, bucketCount)
+	stats, err := indexer.Stats(query, bp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
