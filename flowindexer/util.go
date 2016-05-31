@@ -25,6 +25,9 @@ func logFilenameToDatabase(filename, filenameToDbRegex, regexReplacement string)
 }
 
 func logFilenameToTime(filename string, filenameToTimeRegex *regexp.Regexp) (time.Time, error) {
+	if filenameToTimeRegex == nil {
+		return time.Now(), fmt.Errorf("filename_to_time_regex is not set in indexer configuration")
+	}
 	n1 := filenameToTimeRegex.SubexpNames()
 	r2 := filenameToTimeRegex.FindAllStringSubmatch(filename, -1)[0]
 

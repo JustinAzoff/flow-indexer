@@ -53,7 +53,7 @@ type FlowIndexer struct {
 	config   Config
 }
 
-type BucketHit struct {
+type bucketHit struct {
 	Bucket string `json:"bucket"`
 	Hits   int    `json:"hits"`
 }
@@ -66,7 +66,7 @@ type queryStat struct {
 	FirstTime time.Time `json:"first_time"`
 	LastTime  time.Time `json:"last_time"`
 
-	Buckets []*BucketHit `json:"buckets"`
+	Buckets []*bucketHit `json:"buckets"`
 }
 
 func loadConfig(filename string) (Config, error) {
@@ -155,11 +155,7 @@ func (i *Indexer) FilenameToDatabaseFilename(filename string) (string, error) {
 }
 
 func (i *Indexer) FilenameToTime(filename string) (time.Time, error) {
-	tm, err := logFilenameToTime(filename, i.filenameToTimeRegexp)
-	if err != nil {
-		return time.Now(), err
-	}
-	return tm, nil
+	return logFilenameToTime(filename, i.filenameToTimeRegexp)
 }
 
 func (i *Indexer) IndexOne(filename string, checkGrowing bool) error {
@@ -290,14 +286,18 @@ func (i *Indexer) ExpandCIDR(query string) ([]net.IP, error) {
 	}
 	return allips.SortedIPs(), nil
 }
-
-func (i *Indexer) Stats(query string, bucketInterval string) (queryStat, error) {
+func (i *Indexer) Stats(query string, bucketGroup string, bucketCount string) (queryStat, error) {
 	var stat = queryStat{}
 	docs, err := i.QueryString(query)
-	sort.Strings(docs)
 	if err != nil {
 		return stat, err
 	}
+	return i.FilenamesToStats(docs, bucketGroup, bucketCount)
+}
+
+func (i *Indexer) FilenamesToStats(docs []string, bucketGroup string, bucketCount string) (queryStat, error) {
+	sort.Strings(docs)
+	var stat = queryStat{}
 	if len(docs) > 0 {
 		stat.First = docs[0]
 		stat.Last = docs[len(docs)-1]
@@ -311,22 +311,31 @@ func (i *Indexer) Stats(query string, bucketInterval string) (queryStat, error) 
 	}
 	stat.Hits = len(docs)
 
-	var last string
-	var bp *BucketHit //a pointer to a bucket hit
+	var lastBucket string
+	var lastCount string
+	var bp *bucketHit //a pointer to a bucket hit
 	for _, doc := range docs {
 		if t, err := i.FilenameToTime(doc); err == nil {
-			bucket, err := timeToBucket(t, bucketInterval)
+			bucket, err := timeToBucket(t, bucketGroup)
 			if err != nil {
 				return stat, err
 			}
-			if bucket != last {
-				bh := BucketHit{Bucket: bucket, Hits: 1}
-				stat.Buckets = append(stat.Buckets, &bh)
-				last = bucket
-				bp = &bh
-			} else {
-				bp.Hits++
+			count, err := timeToBucket(t, bucketCount)
+			if err != nil {
+				return stat, err
 			}
+			if bucket != lastBucket {
+				bh := bucketHit{Bucket: bucket, Hits: 1}
+				stat.Buckets = append(stat.Buckets, &bh)
+				lastBucket = bucket
+				lastCount = count
+				bp = &bh
+			} else if lastCount != count {
+				bp.Hits++
+				lastCount = count
+			}
+		} else {
+			return stat, err
 		}
 	}
 

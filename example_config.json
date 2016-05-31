@@ -8,6 +8,7 @@
             "backend": "bro",
             "file_glob": "/bro/logs/*/conn.*gz",
             "filename_to_database_regex": "logs/(?P<yearmonth>\\d+-\\d+)-\\d+/",
+            "filename_to_time_regex": "logs/(?P<year>\\d\\d\\d\\d)-(?P<month>\\d\\d)-(?P<day>\\d\\d)/\\w+\\.(?P<hour>\\d\\d):(?P<minute>\\d\\d)",
             "database_root": "/bro/index/conn/",
             "database_path": "$yearmonth.db"
         },
@@ -16,6 +17,7 @@
             "backend": "bro",
             "file_glob": "/bro/logs/*/http.*gz",
             "filename_to_database_regex": "logs/(?P<yearmonth>\\d+-\\d+)-\\d+/",
+            "filename_to_time_regex": "logs/(?P<year>\\d\\d\\d\\d)-(?P<month>\\d\\d)-(?P<day>\\d\\d)/\\w+\\.(?P<hour>\\d\\d):(?P<minute>\\d\\d)",
             "database_root": "/bro/index/http/",
             "database_path": "$yearmonth.db"
         },
@@ -24,6 +26,7 @@
             "backend": "bro",
             "file_glob": "/bro/logs/*/notice.*gz",
             "filename_to_database_regex": "logs/(?P<year>\\d+)-\\d+-\\d+/",
+            "filename_to_time_regex": "logs/(?P<year>\\d\\d\\d\\d)-(?P<month>\\d\\d)-(?P<day>\\d\\d)/\\w+\\.(?P<hour>\\d\\d):(?P<minute>\\d\\d)",
             "database_root": "/bro/index/notice/",
             "database_path": "$year.db"
         }

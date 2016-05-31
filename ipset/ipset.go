@@ -68,7 +68,10 @@ func (set *Set) AddIP(ip net.IP) error {
 	if err != nil {
 		return err
 	}
-	set.store[keyString] = struct{}{}
+	_, exists := set.store[keyString]
+	if !exists {
+		set.store[keyString] = struct{}{}
+	}
 	return nil
 }
 

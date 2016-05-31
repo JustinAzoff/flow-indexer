@@ -109,6 +109,7 @@ var testConfig = []byte(`
         "name": "bro",
         "backend": "bro",
         "file_glob": "/home/justin/tmp/bro_logs/conn.*",
+		"filename_to_time_regex": "logs/(?P<year>\\d\\d\\d\\d)-(?P<month>\\d\\d)-(?P<day>\\d\\d)/\\w+\\.(?P<hour>\\d\\d):(?P<minute>\\d\\d)",
         "database_root": "/home/justin/tmp/bro_logs",
         "database_path": "db.db"
         }
@@ -124,4 +125,67 @@ func TestNewFlowIndexerFromConfigBytes(t *testing.T) {
 	if fi.indexers["bro"].config.Name != "bro" {
 		t.Errorf("Something wrong with config")
 	}
+}
+
+var testDocuments = []string{
+	"/bro/logs/2015-04-08/conn.10:00:00-11:00:00.log.gz",
+	"/bro/logs/2015-04-08/conn.11:00:00-12:00:00.log.gz",
+	"/bro/logs/2016-05-04/conn.17:00:00-18:00:00.log.gz",
+	"/bro/logs/2016-05-04/conn.18:00:00-19:00:00.log.gz",
+	"/bro/logs/2016-05-05/conn.03:00:00-04:00:00.log.gz",
+	"/bro/logs/2016-05-05/conn.05:00:00-06:00:00.log.gz",
+}
+
+type bucketTest struct {
+	index  int
+	bucket string
+	hits   int
+}
+
+func checkBuckets(t *testing.T, which string, stats queryStat, tests []bucketTest) {
+	for _, tt := range tests {
+		if stats.Buckets[tt.index].Bucket != tt.bucket {
+			t.Errorf("%s stats.Bucket[%d].Bucket => %q, want %q", which, tt.index, stats.Buckets[tt.index].Bucket, tt.bucket)
+		}
+		if stats.Buckets[tt.index].Hits != tt.hits {
+			t.Errorf("%s stats.Bucket[%d].Hits => %d, want %d", which, tt.index, stats.Buckets[tt.index].Hits, tt.hits)
+		}
+	}
+}
+
+var testDocumentsBucketedByMonthHour = []bucketTest{
+	{0, "2015-04", 2},
+	{1, "2016-05", 4},
+}
+var testDocumentsBucketedByMonthDay = []bucketTest{
+	{0, "2015-04", 1},
+	{1, "2016-05", 2},
+}
+
+func TestFilenamesToStats(t *testing.T) {
+	fi, err := NewFlowIndexerFromConfigBytes(testConfig)
+	if err != nil {
+		t.Error(err)
+	}
+	i := fi.indexers["bro"]
+	stats, err := i.FilenamesToStats(testDocuments, "month", "hour")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if stats.First != "/bro/logs/2015-04-08/conn.10:00:00-11:00:00.log.gz" {
+		t.Errorf("stats.First should not be %q", stats.First)
+	}
+	if stats.Last != "/bro/logs/2016-05-05/conn.05:00:00-06:00:00.log.gz" {
+		t.Errorf("stats.Last should not be %q", stats.Last)
+	}
+
+	checkBuckets(t, "month/hour", stats, testDocumentsBucketedByMonthHour)
+
+	stats, err = i.FilenamesToStats(testDocuments, "month", "day")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	checkBuckets(t, "month/day", stats, testDocumentsBucketedByMonthDay)
 }
