@@ -135,6 +135,11 @@ func startWeb(fi *FlowIndexer) {
 	http.HandleFunc("/expandcidr", fh.handleExpandCIDR)
 	http.HandleFunc("/dump", fh.handleDump)
 
+	http.HandleFunc("/v1/search", fh.handleSearch)
+	http.HandleFunc("/v1/stats", fh.handleStats)
+	http.HandleFunc("/v1/expandcidr", fh.handleExpandCIDR)
+	http.HandleFunc("/v1/dump", fh.handleDump)
+
 	bind := fi.config.HTTP.Bind
 	log.Printf("Listening on %q\n", bind)
 	log.Fatal(http.ListenAndServe(bind, nil))
