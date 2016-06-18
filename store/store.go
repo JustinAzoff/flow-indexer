@@ -1,6 +1,7 @@
 package store
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"net"
@@ -11,6 +12,19 @@ import (
 var (
 	docKeyPrefix = []byte{'d', 'o', 'c', ':'}
 )
+
+func ignoreKey(key []byte) bool {
+	//Keys starting with doc: are used internally, however, certain ip addresses like
+	//100.111.99.58 and 646f:633a:... encode to 'doc:' in hex
+	//Ignore the key if it starts with doc: unless it is exactly 4 or 16 bytes long
+	if bytes.HasPrefix(key, docKeyPrefix) {
+		kl := len(key)
+		if kl != 4 && kl != 16 {
+			return true
+		}
+	}
+	return false
+}
 
 func PutUVarint(v uint64) []byte {
 	b := make([]byte, 10)

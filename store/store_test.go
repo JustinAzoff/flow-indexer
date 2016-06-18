@@ -29,6 +29,14 @@ var basicSearchTable = []struct {
 	{"102:304::1", []string{"/log/3.txt"}},
 }
 
+var specialSearchTable = []struct {
+	query string
+	docs  []string
+}{
+	{"100.111.99.0/24", []string{"/log/special.txt"}},
+	{"646f:633a::/64", []string{"/log/special.txt"}},
+}
+
 var basicExpandCidrTable = []struct {
 	query string
 	ips   []net.IP
@@ -81,6 +89,20 @@ func runTest(t *testing.T, s IpStore) {
 		}
 		if fmt.Sprintf("%v", matches) != fmt.Sprintf("%v", tt.ips) {
 			t.Errorf("store.ExpandCIDR(%s) => %v, want %v", tt.query, matches, tt.ips)
+		}
+	}
+
+	ips = ipset.New()
+	ips.AddString("100.111.99.58") //doc: in hex
+	ips.AddString("646f:633a::1")  //doc: in hex
+	s.AddDocument("/log/special.txt", *ips)
+	for _, tt := range specialSearchTable {
+		matches, err := s.QueryString(tt.query)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(matches, tt.docs) {
+			t.Errorf("store.QueryString(%s) => %#v, want %#v", tt.query, matches, tt.docs)
 		}
 	}
 

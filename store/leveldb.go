@@ -122,7 +122,7 @@ func (ls *LevelDBStore) ExpandCIDR(ip string) ([]net.IP, error) {
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
 		key := iter.Key()
-		if bytes.HasPrefix(key, docKeyPrefix) {
+		if ignoreKey(key) {
 			continue
 		}
 		if len(key) != len(start) {
@@ -157,7 +157,7 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
 	for iter.Next() {
 		key := iter.Key()
-		if bytes.HasPrefix(key, docKeyPrefix) {
+		if ignoreKey(key) {
 			continue
 		}
 		if len(key) != len(start) {
