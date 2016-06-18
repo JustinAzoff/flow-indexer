@@ -11,6 +11,13 @@ type fiHandler struct {
 	fi *FlowIndexer
 }
 
+func (fh *fiHandler) handleIndexers(w http.ResponseWriter, req *http.Request) {
+	var indexers []string
+	for ix := range fh.fi.indexers {
+		indexers = append(indexers, ix)
+	}
+	json.NewEncoder(w).Encode(indexers)
+}
 func (fh *fiHandler) handleSearch(w http.ResponseWriter, req *http.Request) {
 	indexerParam := req.FormValue("i")
 	query := req.FormValue("q")
@@ -130,11 +137,13 @@ func (fh *fiHandler) handleDump(w http.ResponseWriter, req *http.Request) {
 
 func startWeb(fi *FlowIndexer) {
 	fh := &fiHandler{fi: fi}
+	http.HandleFunc("/indexers", fh.handleIndexers)
 	http.HandleFunc("/search", fh.handleSearch)
 	http.HandleFunc("/stats", fh.handleStats)
 	http.HandleFunc("/expandcidr", fh.handleExpandCIDR)
 	http.HandleFunc("/dump", fh.handleDump)
 
+	http.HandleFunc("/v1/indexers", fh.handleIndexers)
 	http.HandleFunc("/v1/search", fh.handleSearch)
 	http.HandleFunc("/v1/stats", fh.handleStats)
 	http.HandleFunc("/v1/expandcidr", fh.handleExpandCIDR)
