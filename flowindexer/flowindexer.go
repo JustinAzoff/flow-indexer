@@ -386,9 +386,11 @@ func RunDaemon(config string) {
 	}
 
 	//Before starting the API, make sure all the stores are open
+	log.Printf("Opening existing index stores: starting")
 	for _, indexer := range fi.indexers {
 		indexer.RefreshStores()
 	}
+	log.Printf("Opening existing index stores: complete")
 	go startWeb(fi)
 
 	for _, indexer := range fi.indexers {
