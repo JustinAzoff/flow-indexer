@@ -17,7 +17,7 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 		return err
 	}
 	if exists {
-		log.Printf("%s Already indexed\n", filename)
+		//log.Printf("%s Already indexed\n", filename)
 		return nil
 	}
 	ips := ipset.New()
