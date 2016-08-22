@@ -146,5 +146,9 @@ func BenchmarkStoreLeveldbDocs24(b *testing.B) {
 	runStoreBench(b, "leveldb", 24)
 }
 func BenchmarkStoreLeveldbDocs720(b *testing.B) {
+	if testing.Short() {
+		b.Skip("Skipping large store test in short mode")
+	}
+
 	runStoreBench(b, "leveldb", 720)
 }
