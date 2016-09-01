@@ -1,7 +1,6 @@
 package store
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -39,7 +38,7 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	newStore := &LevelDBStore{db: db, batch: nil, filename: filename, codec: NewMsgpackDeltasCodec()}
+	newStore := &LevelDBStore{db: db, batch: nil, filename: filename, codec: NewBitsetCodec()}
 	newStore.fixDocId()
 	return newStore, nil
 }
