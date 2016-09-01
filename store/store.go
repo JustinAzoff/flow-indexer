@@ -62,10 +62,10 @@ var DefaultStore = "leveldb"
 var storeFactories = map[string]func(string) (IpStore, error){}
 
 func NewStore(storeType string, filename string) (IpStore, error) {
-	_, ok := storeFactories[storeType]
+	storeFactory, ok := storeFactories[storeType]
 	if !ok {
 		return nil, errors.New("Invalid store type")
 	}
-	s, err := NewLevelDBStore(filename)
+	s, err := storeFactory(filename)
 	return s, err
 }
