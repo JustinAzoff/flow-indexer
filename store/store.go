@@ -59,10 +59,7 @@ type IpStore interface {
 
 var DefaultStore = "leveldb"
 
-var storeFactories = map[string]func(string) (IpStore, error){
-	"leveldb": NewLevelDBStore,
-	//	"boltdb":  NewBoltStore,
-}
+var storeFactories = map[string]func(string) (IpStore, error){}
 
 func NewStore(storeType string, filename string) (IpStore, error) {
 	_, ok := storeFactories[storeType]

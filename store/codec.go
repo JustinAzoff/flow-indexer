@@ -17,6 +17,7 @@ type Codec interface {
 	FromBytes([]byte) error
 	WriteTo(io.Writer) error
 	Bytes() ([]byte, error)
+	ToBitset() *bitset.BitSet
 
 	String() string
 }
@@ -72,6 +73,9 @@ func (c *BitsetCodec) Documents() DocumentList {
 	}
 	return docs
 }
+func (c *BitsetCodec) ToBitset() *bitset.BitSet {
+	return c.bs
+}
 
 type MsgpackCodec struct {
 	docs DocumentList
@@ -111,6 +115,13 @@ func (c *MsgpackCodec) Bytes() ([]byte, error) {
 
 func (c *MsgpackCodec) Documents() DocumentList {
 	return c.docs
+}
+func (c *MsgpackCodec) ToBitset() *bitset.BitSet {
+	bs := bitset.New(8)
+	for _, id := range c.Documents() {
+		bs.Set(uint(id))
+	}
+	return bs
 }
 
 func (c *MsgpackCodec) Reset() {
@@ -165,6 +176,13 @@ func (c *MsgpackDeltasCodec) Bytes() ([]byte, error) {
 func (c *MsgpackDeltasCodec) Documents() DocumentList {
 	c.decode()
 	return c.docs
+}
+func (c *MsgpackDeltasCodec) ToBitset() *bitset.BitSet {
+	bs := bitset.New(8)
+	for _, id := range c.Documents() {
+		bs.Set(uint(id))
+	}
+	return bs
 }
 
 func (c *MsgpackDeltasCodec) Reset() {

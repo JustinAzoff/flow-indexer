@@ -16,10 +16,10 @@ import (
 )
 
 type LevelDBStore struct {
-	filename string
-	db       *leveldb.DB
-	batch    *leveldb.Batch
-	codec    Codec
+	filename     string
+	db           *leveldb.DB
+	batch        *leveldb.Batch
+	codecFactory func() Codec
 }
 
 func NewLevelDBStore(filename string) (IpStore, error) {
@@ -38,7 +38,7 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	newStore := &LevelDBStore{db: db, batch: nil, filename: filename, codec: NewBitsetCodec()}
+	newStore := &LevelDBStore{db: db, batch: nil, filename: filename, codecFactory: func() Codec { return NewBitsetCodec() }}
 	newStore.fixDocId()
 	return newStore, nil
 }
@@ -154,6 +154,8 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 	}
 	bs := bitset.New(8)
 	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
+
+	codec := ls.codecFactory()
 	for iter.Next() {
 		key := iter.Key()
 		if ignoreKey(key) {
@@ -163,10 +165,9 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 			//Ensure the matched keys are in the right ip family
 			continue
 		}
-		ls.codec.FromBytes(iter.Value())
-		for _, id := range ls.codec.Documents() {
-			bs.Set(uint(id))
-		}
+		codec.FromBytes(iter.Value())
+		tmpBs := codec.ToBitset()
+		bs = bs.Union(tmpBs)
 	}
 	iter.Release()
 	err = iter.Error()
@@ -187,11 +188,9 @@ func (ls *LevelDBStore) QueryStringIP(ip string) ([]string, error) {
 	if err == leveldb.ErrNotFound {
 		return docs, nil
 	}
-	bs := bitset.New(8)
-	ls.codec.FromBytes(v)
-	for _, id := range ls.codec.Documents() {
-		bs.Set(uint(id))
-	}
+	codec := ls.codecFactory()
+	codec.FromBytes(v)
+	bs := codec.ToBitset()
 	return ls.bitsetToDocs(bs)
 }
 
@@ -255,17 +254,20 @@ func (ls *LevelDBStore) addIP(id uint64, k string) error {
 	if err != nil && err != leveldb.ErrNotFound {
 		return err
 	}
+	codec := ls.codecFactory()
 	if err != leveldb.ErrNotFound {
-		ls.codec.FromBytes(v)
-	} else {
-		ls.codec.Reset()
+		codec.FromBytes(v)
 	}
-	ls.codec.AddID(DocumentID(id))
+	codec.AddID(DocumentID(id))
 
-	bytes, err := ls.codec.Bytes()
+	bytes, err := codec.Bytes()
 	if err != nil {
 		return err
 	}
 	ls.batch.Put([]byte(k), bytes)
 	return nil
+}
+
+func init() {
+	storeFactories["leveldb"] = NewLevelDBStore
 }
