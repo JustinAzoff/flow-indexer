@@ -135,6 +135,7 @@ func runStoreBench(b *testing.B, storeType string, documents int) {
 		b.Error(err)
 		return
 	}
+	defer mystore.Close()
 	defer os.RemoveAll("test.db")
 	for n := 0; n < b.N; n++ {
 		for doc := 0; doc < documents; doc++ {
