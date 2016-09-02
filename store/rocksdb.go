@@ -48,6 +48,8 @@ func NewRocksDBStore(filename string) (IpStore, error) {
 }
 
 func (rs *RocksDBStore) Close() error {
+	rs.cfdocs.Destroy()
+	rs.cfips.Destroy()
 	rs.db.Close()
 	return nil
 }
