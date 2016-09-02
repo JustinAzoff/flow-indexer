@@ -28,11 +28,13 @@ var wo = gorocksdb.NewDefaultWriteOptions()
 func NewRocksDBStore(filename string) (IpStore, error) {
 	//TODO: steal options from ledisdb
 	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
+	bbto.SetBlockSize(65536)
 	bbto.SetBlockCache(gorocksdb.NewLRUCache(3 << 30))
 	opts := gorocksdb.NewDefaultOptions()
 	opts.SetCreateIfMissingColumnFamilies(true)
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
+	opts.SetWriteBufferSize(134217728)
 	db, cfh, err := gorocksdb.OpenDbColumnFamilies(opts, filename, []string{"default", "ips"}, []*gorocksdb.Options{opts, opts})
 	if err != nil {
 		return nil, errors.Wrap(err, "NewRocksDBStore failed")
