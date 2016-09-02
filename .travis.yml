@@ -4,6 +4,7 @@ go:
   - 1.6
   - 1.7
   - tip
+
 addons:
   apt:
     sources:
@@ -11,3 +12,5 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
+
+before_install: export CXX="g++-4.8" CC="gcc-4.8"
