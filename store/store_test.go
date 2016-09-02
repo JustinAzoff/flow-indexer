@@ -118,6 +118,16 @@ func TestLeveldb(t *testing.T) {
 	runTest(t, mystore)
 
 }
+func TestRocksdb(t *testing.T) {
+	mystore, err := NewStore("rocksdb", "test.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mystore.Close()
+	defer os.RemoveAll("test.db")
+	runTest(t, mystore)
+
+}
 
 func runStoreBench(b *testing.B, storeType string, documents int) {
 	mystore, err := NewStore(storeType, "test.db")
@@ -151,4 +161,17 @@ func BenchmarkStoreLeveldbDocs720(b *testing.B) {
 	}
 
 	runStoreBench(b, "leveldb", 720)
+}
+func BenchmarkStoreRocksdbDocs1(b *testing.B) {
+	runStoreBench(b, "rocksdb", 1)
+}
+func BenchmarkStoreRocksdbDocs24(b *testing.B) {
+	runStoreBench(b, "rocksdb", 24)
+}
+func BenchmarkStoreRocksdbDocs720(b *testing.B) {
+	if testing.Short() {
+		b.Skip("Skipping large store test in short mode")
+	}
+
+	runStoreBench(b, "rocksdb", 720)
 }
