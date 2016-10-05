@@ -58,8 +58,8 @@ Starting the daemon will expand file\_glob and index any log file that matches.
 Query API
 ---------
 
-    $ curl -s 'localhost:8080/search?i=conn&q=1.2.3.0/24"
-    $ curl -s 'localhost:8080/stats?i=conn&q=1.2.3.0/24"
+    $ curl -s 'localhost:8080/search?i=conn&q=1.2.3.0/24'
+    $ curl -s 'localhost:8080/stats?i=conn&q=1.2.3.0/24'
 
 Lower level commands example
 ============================
