@@ -1,10 +1,8 @@
 package backend
 
 import (
-	"bufio"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/google/gopacket"
@@ -54,25 +52,7 @@ func (b PCAPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error
 }
 
 func (b PCAPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	br := bufio.NewReader(reader)
-
-	realQuery := fmt.Sprintf("\t%s\t", query)
-
-	for {
-		line, err := br.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if strings.Index(line, realQuery) != -1 {
-			if _, err = io.WriteString(writer, line); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return fmt.Errorf("Not Implemented Yet")
 }
 
 func init() {
