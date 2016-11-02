@@ -29,6 +29,7 @@ func (b PCAPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error
 	decoded := []gopacket.LayerType{}
 	for {
 		packetData, _, err := pr.ReadPacketData()
+		packets++
 		if err == io.EOF {
 			break
 		}
