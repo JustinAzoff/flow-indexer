@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"io"
+	"os/exec"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/google/gopacket"
@@ -53,7 +54,14 @@ func (b PCAPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error
 }
 
 func (b PCAPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	return fmt.Errorf("Not Implemented Yet")
+	filter := fmt.Sprintf("(net %s) or (vlan and net %s)", query, query)
+
+	cmd := exec.Command("tcpdump", "-nn", "-r", "-", filter)
+	cmd.Stdin = reader
+	cmd.Stdout = writer
+
+	err := cmd.Run()
+	return err
 }
 
 func init() {
