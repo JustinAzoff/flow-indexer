@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 
@@ -25,6 +26,32 @@ type RocksDBStore struct {
 var ro = gorocksdb.NewDefaultReadOptions()
 var wo = gorocksdb.NewDefaultWriteOptions()
 
+type bitsetMergeOperator struct {
+	fullMerge    func(key, existingValue []byte, operands [][]byte) ([]byte, bool)
+	partialMerge func(key, leftOperand, rightOperand []byte) ([]byte, bool)
+	codecFactory func() Codec
+}
+
+func (m *bitsetMergeOperator) Name() string { return "bitsetMergeOperator\000" }
+func (m *bitsetMergeOperator) FullMerge(key, existingValue []byte, operands [][]byte) ([]byte, bool) {
+	codec := m.codecFactory()
+	if len(existingValue) != 0 {
+		codec.FromBytes(existingValue)
+	}
+	for _, v := range operands {
+		codec.Merge(v)
+	}
+	bytes, err := codec.Bytes()
+	if err != nil {
+		log.Printf("Error merging: %s", err)
+		return nil, false
+	}
+	return bytes, true
+}
+func (m *bitsetMergeOperator) PartialMerge(key, leftOperand, rightOperand []byte) ([]byte, bool) {
+	return nil, false
+}
+
 func NewRocksDBStore(filename string) (IpStore, error) {
 	//TODO: steal options from ledisdb
 	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
@@ -35,6 +62,11 @@ func NewRocksDBStore(filename string) (IpStore, error) {
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.SetWriteBufferSize(134217728)
+	opts.SetMergeOperator(&bitsetMergeOperator{
+		codecFactory: func() Codec { return NewBitsetCodec() },
+	})
+	opts.SetMaxSuccessiveMerges(8)
+
 	db, cfh, err := gorocksdb.OpenDbColumnFamilies(opts, filename, []string{"default", "ips"}, []*gorocksdb.Options{opts, opts})
 	if err != nil {
 		return nil, errors.Wrap(err, "NewRocksDBStore failed")
@@ -210,6 +242,9 @@ func (rs *RocksDBStore) QueryStringIP(ip string) ([]string, error) {
 		return nil, err
 	}
 	v, err := rs.db.GetCF(ro, rs.cfips, []byte(key))
+	if err != nil {
+		return nil, err
+	}
 	defer v.Free()
 	if v.Size() == 0 {
 		return docs, nil
@@ -261,22 +296,13 @@ func (rs *RocksDBStore) setDocId(batch *gorocksdb.WriteBatch, filename string, i
 }
 
 func (rs *RocksDBStore) addIP(batch *gorocksdb.WriteBatch, id uint64, k string) error {
-	v, err := rs.db.GetCF(ro, rs.cfips, []byte(k))
-	if err != nil {
-		return errors.Wrap(err, "addIP")
-	}
-	defer v.Free()
 	codec := rs.codecFactory()
-	if v.Size() != 0 {
-		codec.FromBytes(v.Data())
-	}
 	codec.AddID(DocumentID(id))
-
 	bytes, err := codec.Bytes()
 	if err != nil {
 		return err
 	}
-	batch.PutCF(rs.cfips, []byte(k), bytes)
+	batch.MergeCF(rs.cfips, []byte(k), bytes)
 	return nil
 }
 

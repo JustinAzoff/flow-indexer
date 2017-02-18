@@ -14,6 +14,7 @@ type Codec interface {
 	Reset()
 
 	ReadFrom(io.Reader) error
+	Merge([]byte) error
 	FromBytes([]byte) error
 	WriteTo(io.Writer) error
 	Bytes() ([]byte, error)
@@ -40,11 +41,20 @@ func (c *BitsetCodec) String() string {
 }
 
 func (c *BitsetCodec) ReadFrom(r io.Reader) error {
-	c.bs.ReadFrom(r)
-	return nil
+	_, err := c.bs.ReadFrom(r)
+	return err
 }
 func (c *BitsetCodec) FromBytes(b []byte) error {
-	c.bs.ReadFrom(bytes.NewBuffer(b))
+	_, err := c.bs.ReadFrom(bytes.NewBuffer(b))
+	return err
+}
+func (c *BitsetCodec) Merge(b []byte) error {
+	tmpbs := bitset.New(8)
+	_, err := tmpbs.ReadFrom(bytes.NewBuffer(b))
+	if err != nil {
+		return err
+	}
+	c.bs = c.bs.Union(tmpbs)
 	return nil
 }
 
