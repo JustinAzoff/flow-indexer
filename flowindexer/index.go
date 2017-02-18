@@ -36,7 +36,10 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 		log.Printf("%s: Non fatal read error: %s\n", filename, err)
 	}
 	start = time.Now()
-	s.AddDocument(filename, *ips)
+	err = s.AddDocument(filename, *ips)
+	if err != nil {
+		return err
+	}
 	duration = time.Since(start)
 	log.Printf("%s: Wrote %d unique ips in %s\n", filename, ips.Count(), duration)
 	return nil
