@@ -1,6 +1,7 @@
 package store
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -119,7 +120,9 @@ func (ls *LevelDBStore) ExpandCIDR(ip string) ([]net.IP, error) {
 	if err != nil {
 		return ips, err
 	}
-	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
+	bstart := []byte(start)
+	bend := []byte(end)
+	iter := ls.db.NewIterator(&util.Range{Start: bstart, Limit: nil}, nil)
 	for iter.Next() {
 		key := iter.Key()
 		if ignoreKey(key) {
@@ -128,6 +131,9 @@ func (ls *LevelDBStore) ExpandCIDR(ip string) ([]net.IP, error) {
 		if len(key) != len(start) {
 			//Ensure the matched keys are in the right ip family
 			continue
+		}
+		if bytes.Compare(key, bend) > 0 {
+			break
 		}
 		keycopy := make([]byte, len(key))
 		copy(keycopy, key)
@@ -152,8 +158,10 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	bstart := []byte(start)
+	bend := []byte(end)
 	bs := bitset.New(8)
-	iter := ls.db.NewIterator(&util.Range{Start: []byte(start), Limit: []byte(end)}, nil)
+	iter := ls.db.NewIterator(&util.Range{Start: bstart, Limit: nil}, nil)
 
 	codec := ls.codecFactory()
 	for iter.Next() {
@@ -164,6 +172,9 @@ func (ls *LevelDBStore) QueryStringCidr(ip string) ([]string, error) {
 		if len(key) != len(start) {
 			//Ensure the matched keys are in the right ip family
 			continue
+		}
+		if bytes.Compare(key, bend) > 0 {
+			break
 		}
 		codec.FromBytes(iter.Value())
 		tmpBs := codec.ToBitset()

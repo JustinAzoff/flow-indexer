@@ -1,0 +1,14 @@
+[Unit]
+Description=Flow Indexer Daemon
+After=network.target
+
+[Service]
+User=flowindexer
+Group=flowindexer
+ExecStart=/usr/bin/flow-indexer daemon --config /etc/flowindexer.json
+Restart=on-failure
+RestartSec=10s
+InaccessibleDirectories=/home
+
+[Install]
+WantedBy=multi-user.target

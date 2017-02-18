@@ -25,6 +25,7 @@ var basicSearchTable = []struct {
 	docs  []string
 }{
 	{"1.2.3.4/24", []string{"/log/1.txt", "/log/2.txt"}},
+	{"1.2.3.3/32", []string{"/log/1.txt", "/log/2.txt"}},
 	{"2.0.0.0/8", []string{"/log/2.txt"}},
 	{"102:304::1", []string{"/log/3.txt"}},
 }
@@ -41,8 +42,8 @@ var basicExpandCidrTable = []struct {
 	query string
 	ips   []net.IP
 }{
-	{"1.2.3.0/24", makeIps([]string{"1.2.3.1", "1.2.3.2", "1.2.3.3", "1.2.3.4"})},
-	{"1.0.0.0/8", makeIps([]string{"1.2.3.1", "1.2.3.2", "1.2.3.3", "1.2.3.4"})},
+	{"1.2.3.0/24", makeIps([]string{"1.2.3.1", "1.2.3.2", "1.2.3.3", "1.2.3.4", "1.2.3.255"})},
+	{"1.0.0.0/8", makeIps([]string{"1.2.3.1", "1.2.3.2", "1.2.3.3", "1.2.3.4", "1.2.3.255"})},
 	{"2.0.0.0/8", makeIps([]string{"2.0.0.2", "2.0.0.3"})},
 
 	//Once convered, this is starts with \x01\x02\x03\x04 in hex
@@ -62,6 +63,7 @@ func runTest(t *testing.T, s IpStore) {
 	ips.AddString("1.2.3.2")
 	ips.AddString("1.2.3.3")
 	ips.AddString("1.2.3.4")
+	ips.AddString("1.2.3.255")
 	s.AddDocument("/log/1.txt", *ips)
 
 	ips.AddString("2.0.0.2")
