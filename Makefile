@@ -1,10 +1,15 @@
 all: build test
 build:
-	go get -tags=embed github.com/tecbot/gorocksdb
 	go get -t -v ./...
-	go build -tags=embed
+	go build
 test:
 	go test -tags=embed -v ./...
+build_rocks:
+	go get -tags=embed github.com/tecbot/gorocksdb
+	go get -t -v ./...
+	go build -tags='embed rocksdb'
+test_rocks:
+	go test -tags='embed rocksdb' -v ./...
 
 .PHONY: rpm
 rpm: build
