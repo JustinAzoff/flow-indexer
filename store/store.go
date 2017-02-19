@@ -3,8 +3,9 @@ package store
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
+	"fmt"
 	"net"
+	"strings"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
@@ -61,10 +62,18 @@ var DefaultStore = "leveldb"
 
 var storeFactories = map[string]func(string) (IpStore, error){}
 
+func storeTypes() string {
+	var stores []string
+	for s := range storeFactories {
+		stores = append(stores, s)
+	}
+	return strings.Join(stores, ", ")
+}
+
 func NewStore(storeType string, filename string) (IpStore, error) {
 	storeFactory, ok := storeFactories[storeType]
 	if !ok {
-		return nil, errors.New("Invalid store type")
+		return nil, fmt.Errorf("Invalid store type: %s. Available stores: [%s]", storeType, storeTypes())
 	}
 	s, err := storeFactory(filename)
 	return s, err
