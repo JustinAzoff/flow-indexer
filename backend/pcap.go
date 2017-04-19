@@ -54,7 +54,7 @@ func (b PCAPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error
 }
 
 func (b PCAPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	filter := fmt.Sprintf("(net %s) or (vlan and net %s)", query, query)
+	filter := fmt.Sprintf("(net %s) or (vlan and net %s) or (vlan and vlan and net %s)", query, query, query)
 
 	cmd := exec.Command("tcpdump", "-nn", "-r", "-", filter)
 	cmd.Stdin = reader
