@@ -357,10 +357,10 @@ func (i *Indexer) Dump(query string, writer io.Writer) error {
 	for _, fn := range docs {
 		err = backend.FilterIPs(i.config.Backend, fn, query, writer)
 		if err != nil {
-			return err
+			log.Printf("Error dumping %q: %q", fn, err)
 		}
 	}
-	return nil
+	return err
 }
 
 func RunIndexAll(config string) {
