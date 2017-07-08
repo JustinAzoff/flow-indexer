@@ -72,6 +72,7 @@ type queryStat struct {
 	LastTime  time.Time `json:"last_time"`
 
 	Buckets []*bucketHit `json:"buckets"`
+	Errors  []string     `json:"errors"`
 }
 
 func loadConfig(filename string) (Config, error) {
@@ -340,7 +341,7 @@ func (i *Indexer) FilenamesToStats(docs []string, buckerparam bucketParam) (quer
 				lastCount = count
 			}
 		} else {
-			return stat, err
+			stat.Errors = append(stat.Errors, err.Error())
 		}
 	}
 
@@ -356,10 +357,10 @@ func (i *Indexer) Dump(query string, writer io.Writer) error {
 	for _, fn := range docs {
 		err = backend.FilterIPs(i.config.Backend, fn, query, writer)
 		if err != nil {
-			return err
+			log.Printf("Error dumping %q: %q", fn, err)
 		}
 	}
-	return nil
+	return err
 }
 
 func RunIndexAll(config string) {
