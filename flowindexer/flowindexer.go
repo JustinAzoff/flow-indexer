@@ -72,6 +72,7 @@ type queryStat struct {
 	LastTime  time.Time `json:"last_time"`
 
 	Buckets []*bucketHit `json:"buckets"`
+	Errors  []string     `json:"errors"`
 }
 
 func loadConfig(filename string) (Config, error) {
@@ -340,7 +341,7 @@ func (i *Indexer) FilenamesToStats(docs []string, buckerparam bucketParam) (quer
 				lastCount = count
 			}
 		} else {
-			return stat, err
+			stat.Errors = append(stat.Errors, err.Error())
 		}
 	}
 

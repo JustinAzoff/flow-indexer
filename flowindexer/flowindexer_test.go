@@ -136,6 +136,14 @@ var testDocuments = []string{
 	"/bro/logs/2016-05-05/conn.03:00:00-04:00:00.log.gz",
 	"/bro/logs/2016-05-05/conn.05:00:00-06:00:00.log.gz",
 }
+var testDocumentsWithError = []string{
+	"/bro/logs/2015-04-08/conn.10:00:00-11:00:00.log.gz",
+	"/bro/logs/2015-04-08/conn.11:00:00-12:00:00.log.gz",
+	"/bro/logs/2016-05-04/this.was.a.broken.filename.gz",
+	"/bro/logs/2016-05-04/conn.18:00:00-19:00:00.log.gz",
+	"/bro/logs/2016-05-05/conn.03:00:00-04:00:00.log.gz",
+	"/bro/logs/2016-05-05/conn.05:00:00-06:00:00.log.gz",
+}
 
 type bucketTest struct {
 	index  int
@@ -189,6 +197,30 @@ func TestFilenamesToStats(t *testing.T) {
 	}
 	if stats.Last != "/bro/logs/2016-05-05/conn.05:00:00-06:00:00.log.gz" {
 		t.Errorf("stats.Last should not be %q", stats.Last)
+	}
+
+	checkBuckets(t, i, "month/hour", testDocuments, testDocumentsBucketedByMonthHour)
+	checkBuckets(t, i, "month/day", testDocuments, testDocumentsBucketedByMonthDay)
+}
+func TestFilenamesToStatsInvalidFilenames(t *testing.T) {
+	fi, err := NewFlowIndexerFromConfigBytes(testConfig)
+	if err != nil {
+		t.Error(err)
+	}
+	i := fi.indexers["bro"]
+	stats, err := i.FilenamesToStats(testDocumentsWithError, bucketParam{"year", "day"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if stats.First != "/bro/logs/2015-04-08/conn.10:00:00-11:00:00.log.gz" {
+		t.Errorf("stats.First should not be %q", stats.First)
+	}
+	if stats.Last != "/bro/logs/2016-05-05/conn.05:00:00-06:00:00.log.gz" {
+		t.Errorf("stats.Last should not be %q", stats.Last)
+	}
+	if len(stats.Errors) != 1 || stats.Errors[0] != "filename_to_time_regex did not match \"/bro/logs/2016-05-04/this.was.a.broken.filename.gz\"" {
+		t.Errorf("stats.Errors should contain an error about this.was.a.broken.filename.gz: %v", stats.Errors)
 	}
 
 	checkBuckets(t, i, "month/hour", testDocuments, testDocumentsBucketedByMonthHour)
