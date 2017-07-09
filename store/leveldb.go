@@ -101,7 +101,7 @@ func (ls *LevelDBStore) ListDocuments() error {
 	for i := uint64(0); i < nextID; i += 1 {
 		name, err := ls.DocumentIDToName(i)
 		if err != nil {
-			break
+			return err
 		}
 		fmt.Printf("Document %d is %#v\n", i, name)
 	}
@@ -206,16 +206,15 @@ func (ls *LevelDBStore) QueryStringIP(ip string) ([]string, error) {
 }
 
 func (ls *LevelDBStore) bitsetToDocs(bs *bitset.BitSet) ([]string, error) {
-	var err error
 	var docs []string
 	for i, e := bs.NextSet(0); e; i, e = bs.NextSet(i + 1) {
 		name, err := ls.DocumentIDToName(uint64(i))
 		if err != nil {
-			break
+			return docs, err
 		}
 		docs = append(docs, name)
 	}
-	return docs, err
+	return docs, nil
 }
 
 //fixDocId fixes an issue where the max docid was stored under max_id
