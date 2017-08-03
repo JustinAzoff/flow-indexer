@@ -61,6 +61,45 @@ Query API
     $ curl -s 'localhost:8080/search?i=conn&q=1.2.3.0/24'
     $ curl -s 'localhost:8080/stats?i=conn&q=1.2.3.0/24'
 
+System Configuration
+====================
+
+**Running flow-indexer as a service**  
+*systemd*  
+To run flow-indexer as a service on a system using systemd, you can use the
+[provided flow-indexer.service file](./flow-indexer.service).
+
+*SysVinit*  
+If you are planning to run flow-indexer as a service on a system that uses
+SysVinit, you may want to consider a conf file like the following in order
+to properly syslog stdout and stderr from flow-indexer, and to run as a
+non-root user.
+```
+# flow-indexer - Flow Indexer
+#
+# flow-indexer is a service that indexes and allows retrieval of flows using bro logs
+
+description     "Flow Indexer Daemon"
+
+start on runlevel [345]
+stop on runlevel [!345]
+
+setuid flowindexer
+setgid flowindexer
+
+exec /path/to/bin/flow-indexer daemon --config /path/to/flow-indexer/config.json 2>&1 | logger -t flow-indexer
+```
+
+**Common Issues**  
+In order to avoid `too many open files` errors, you may want to increase the
+number of open files you allow the user that flow-indexer runs as to have
+access to.  This can be done by changing your `nofile` setting in
+`/etc/security/limits.conf` as shown below.
+```
+flowindexer soft nofile 65535
+flowindexer hard nofile 65535
+```
+
 Lower level commands example
 ============================
 
