@@ -20,17 +20,14 @@ Flow Indexer [![Build Status](https://travis-ci.org/JustinAzoff/flow-indexer.svg
 
     Use "flow-indexer [command] --help" for more information about a command.
 
-Quickstart
-==========
+# Quickstart
 
-Install
--------
+## Install
 
     $ export GOPATH=~/go
     $ go get github.com/JustinAzoff/flow-indexer
 
-Create configuration
---------------------
+## Create configuration
 
     $ cp ~/go/src/github.com/JustinAzoff/flow-indexer/example_config.json config.json
     $ vi config.json # Adjust log paths and database paths.
@@ -48,30 +45,29 @@ The deciding factor for how to partition the databases is how many unique ips
 you see per day.  I suggest starting with monthly indexes.  If the indexing
 performance takes a huge hit by the end of the month, switch to daily indexes.
 
-Start Daemon
-------------
+## Start Daemon
 
 Starting the daemon will expand file\_glob and index any log file that matches.
 
     $ ~/go/bin/flow-indexer daemon
 
-Query API
----------
+## Query API
 
     $ curl -s 'localhost:8080/search?i=conn&q=1.2.3.0/24'
     $ curl -s 'localhost:8080/stats?i=conn&q=1.2.3.0/24'
 
-System Configuration
-====================
+## Service Configuration
+Running flow-indexer as a service
 
-**Running flow-indexer as a service**  
-*systemd*  
+### systemd
+
 To run flow-indexer as a service on a system using systemd, you can use the
 [provided flow-indexer.service file](./flow-indexer.service).
 
-*SysVinit*  
+### upstart
+
 If you are planning to run flow-indexer as a service on a system that uses
-SysVinit, you may want to consider a conf file like the following in order
+upstart, you may want to consider a conf file like the following in order
 to properly syslog stdout and stderr from flow-indexer, and to run as a
 non-root user.
 ```
@@ -90,7 +86,7 @@ setgid flowindexer
 exec /path/to/bin/flow-indexer daemon --config /path/to/flow-indexer/config.json 2>&1 | logger -t flow-indexer
 ```
 
-**Common Issues**  
+# Common Issues
 In order to avoid `too many open files` errors, you may want to increase the
 number of open files you allow the user that flow-indexer runs as to have
 access to.  This can be done by changing your `nofile` setting in
