@@ -46,11 +46,20 @@ The deciding factor for how to partition the databases is how many unique ips
 you see per day.  I suggest starting with monthly indexes.  If the indexing
 performance takes a huge hit by the end of the month, switch to daily indexes.
 
+## Run initial index
+
+the `indexall` command will expand file\_glob and index any log file that matches.
+
+    $ ~/go/bin/flow-indexer indexall
+
 ## Start Daemon
 
-Starting the daemon will expand file\_glob and index any log file that matches.
+Once the initial index is complete, start the daemon.  Starting the daemon will
+expand recent\_file\_glob and index any recently created log file that matches.
 
     $ ~/go/bin/flow-indexer daemon
+
+It will do this in a 60 second loop to keep itself up to date.
 
 ## Query API
 
