@@ -17,6 +17,8 @@ import (
 	"github.com/JustinAzoff/flow-indexer/backend"
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/JustinAzoff/flow-indexer/store"
+
+	strftime "github.com/jehiah/go-strftime"
 )
 
 type indexerConfig struct {
@@ -24,6 +26,7 @@ type indexerConfig struct {
 	Backend                 string `json:"backend"`
 	Indexer                 string `json:"indexer"`
 	FileGlob                string `json:"file_glob"`
+	RecentFileGlob          string `json:"recent_file_glob"`
 	Store                   string `json:"store"`
 	FilenameToDatabaseRegex string `json:"filename_to_database_regex"`
 	FilenameToTimeRegexp    string `json:"filename_to_time_regex"`
@@ -149,6 +152,26 @@ func (i *Indexer) ListLogs() ([]string, error) {
 	return logs, nil
 }
 
+func (i *Indexer) ListRecentLogs() ([]string, error) {
+	var logs []string
+	g := i.config.RecentFileGlob
+	if g == "" {
+		log.Printf("Warning, recent_file_glob not defined, using file_glob for updates")
+		return i.ListLogs()
+	}
+
+	today := time.Now()
+	yesterday := today.Add(-24 * time.Hour)
+	td_glob := strftime.Format(g, today)
+	yd_glob := strftime.Format(g, yesterday)
+
+	some_logs, err := filepath.Glob(yd_glob)
+	logs = append(logs, some_logs...)
+	some_logs, err = filepath.Glob(td_glob)
+	logs = append(logs, some_logs...)
+	return logs, err
+}
+
 func (i *Indexer) FilenameToDatabaseFilename(filename string) (string, error) {
 	db, err := logFilenameToDatabase(filename, i.config.FilenameToDatabaseRegex, i.config.DatabasePath)
 	if err != nil {
@@ -201,6 +224,7 @@ func (i *Indexer) IndexOne(filename string, checkGrowing bool) error {
 	return nil
 }
 
+//IndexAll uses file_glob to find and index all log files
 func (i *Indexer) IndexAll() error {
 	logs, err := i.ListLogs()
 	if err != nil {
@@ -215,6 +239,24 @@ func (i *Indexer) IndexAll() error {
 
 	return nil
 }
+
+//IndexRecent uses recent_file_glob to find and index all log files
+//Created in the past 2 days.
+func (i *Indexer) IndexRecent() error {
+	logs, err := i.ListRecentLogs()
+	if err != nil {
+		return err
+	}
+	for idx, l := range logs {
+		//Assume the last file in the list is the most recent one
+		//and check to see if it is still growing before indexing it
+		checkGrowing := idx == len(logs)-1
+		i.IndexOne(l, checkGrowing)
+	}
+
+	return nil
+}
+
 func (i *Indexer) OpenOrCreateStore(filename string) (*store.IpStore, error) {
 	s, alreadyExists := i.storeMap[filename]
 	if alreadyExists {
@@ -398,7 +440,7 @@ func RunDaemon(config string) {
 		go func(indexer *Indexer) {
 			for {
 				indexer.RefreshStores()
-				indexer.IndexAll()
+				indexer.IndexRecent()
 				time.Sleep(60 * time.Second)
 			}
 		}(indexer)

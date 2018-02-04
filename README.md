@@ -37,6 +37,7 @@ The indexer configuration is as follows:
 * name - The name of the indexer. Keep this short and lowercase, as you will use it as an http query param.
 * backend - The backend log ip extractor to use. Choices: bro, bro\_json, nfdump, syslog.
 * file\_glob - The shell globbing pattern that should match all of your log files.
+* recent\_file\_glob - The strftime+shell globbing pattern that should match todays log files.
 * filename\_to\_database\_regex - A regular expression applied to each filename used to extract information used to name the database.
 * database\_root - Where databases will be written to.  Should be indexer specific.
 * datapath\_path - The name of an individual database.  This can contain $variables set in filename\_to\_database\_regex.

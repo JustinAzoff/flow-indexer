@@ -36,6 +36,12 @@
   version = "v1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/jehiah/go-strftime"
+  packages = ["."]
+  revision = "1d33003b386959af197ba96475f198c114627b5e"
+
+[[projects]]
   name = "github.com/klauspost/compress"
   packages = ["flate"]
   revision = "6c8db69c4b49dd4df1fff66996cf556176d0b9bf"
@@ -157,6 +163,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "85be3590813229e34a9a6b560880290f9cb0a5c97068867b77c5845c9f6412dd"
+  inputs-digest = "9b04f6a76750c0d9209cd87a950f729abf7ad3610b077347f47c40b86d19a1a6"
   solver-name = "gps-cdcl"
   solver-version = 1
