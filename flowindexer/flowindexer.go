@@ -1,6 +1,7 @@
 package flowindexer
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -397,7 +398,12 @@ func (i *Indexer) Dump(query string, writer io.Writer) error {
 	}
 
 	for _, fn := range docs {
-		err = backend.FilterIPs(i.config.Backend, fn, query, writer)
+		bw := bufio.NewWriter(writer)
+		err = backend.FilterIPs(i.config.Backend, fn, query, bw)
+		if bw.Flush() != nil {
+			log.Printf("Error dumping %q: %q", fn, bw.Flush())
+			return bw.Flush()
+		}
 		if err != nil {
 			log.Printf("Error dumping %q: %q", fn, err)
 		}
