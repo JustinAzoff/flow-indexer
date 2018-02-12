@@ -32,7 +32,7 @@ func init() {
 }
 
 func (b SyslogBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
-	br := bufio.NewReader(reader)
+	br := bufio.NewReaderSize(reader, maxLineLength)
 
 	lines := uint64(0)
 	for {
@@ -59,7 +59,7 @@ func (b SyslogBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 }
 
 func (b SyslogBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	br := bufio.NewReader(reader)
+	br := bufio.NewReaderSize(reader, maxLineLength)
 
 	for {
 		line, err := br.ReadString('\n')

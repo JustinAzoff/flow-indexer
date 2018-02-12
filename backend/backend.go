@@ -6,6 +6,8 @@ import (
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
+const maxLineLength = 20 * 1024 * 1024
+
 type Backend interface {
 	ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error)
 	Filter(reader io.Reader, query string, writer io.Writer) error

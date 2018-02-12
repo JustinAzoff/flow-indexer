@@ -13,7 +13,7 @@ type BroBackend struct {
 }
 
 func (b BroBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
-	br := bufio.NewReader(reader)
+	br := bufio.NewReaderSize(reader, maxLineLength)
 
 	lines := uint64(0)
 	for {
@@ -35,7 +35,7 @@ func (b BroBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error)
 }
 
 func (b BroBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	br := bufio.NewReader(reader)
+	br := bufio.NewReaderSize(reader, maxLineLength)
 
 	realQuery := fmt.Sprintf("\t%s\t", query)
 
