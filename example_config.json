@@ -32,6 +32,16 @@
             "filename_to_time_regex": "logs/(?P<year>\\d\\d\\d\\d)-(?P<month>\\d\\d)-(?P<day>\\d\\d)/\\w+\\.(?P<hour>\\d\\d):(?P<minute>\\d\\d)",
             "database_root": "/bro/index/notice/",
             "database_path": "$year.db"
+        },
+        {
+            "name": "flows",
+            "backend": "nfdump",
+            "file_glob": "/netflow/data/*/*/*/*/nfcapd.*",
+            "recent_file_glob": "/netflow/data/*/%Y/%m/%d/nfcapd.*",
+            "filename_to_database_regex": "nfcapd.(?P<year>\\d\\d\\d\\d)(?P<month>\\d\\d)(?P<day>\\d\\d)(?P<hour>\\d\\d)(?P<minute>\\d\\d)",
+            "filename_to_time_regex": "nfcapd.(?P<year>\\d\\d\\d\\d)(?P<month>\\d\\d)(?P<day>\\d\\d)(?P<hour>\\d\\d)(?P<minute>\\d\\d)",
+            "database_root": "/opt/flow-indexer/flows/",
+            "database_path": "$year$month$day.db"
         }
     ]
 }
