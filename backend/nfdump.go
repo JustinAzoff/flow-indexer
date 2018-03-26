@@ -66,30 +66,23 @@ func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 	if err != nil {
 		return 0, err
 	}
-	br := bufio.NewReader(stdout)
+	scanner := bufio.NewScanner(stdout)
+	scanner.Split(bufio.ScanWords)
 
 	lines := uint64(0)
-	for {
-		line, err := br.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return lines, err
-		}
-		line = strings.TrimRight(line, "\n")
-		parts := strings.Split(line, " ")
-		for x := range parts {
-			if parts[x] != "" {
-				if err = ips.AddString(parts[x]); err != nil {
-					return lines, err
-				}
-			}
+	for scanner.Scan() {
+		if err = ips.AddString(scanner.Text()); err != nil {
+			return lines / 2, err
 		}
 		lines++
 	}
+	if err := scanner.Err(); err != nil {
+		return lines / 2, err
+	}
 	err = cmd.Wait()
-	return lines, err
+
+	# Each line gets counted twice in the scanner.Scan for loop
+	return lines / 2, err
 }
 func (b NFDUMPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
 	return nil
