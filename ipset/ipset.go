@@ -31,7 +31,7 @@ func IPToByteString(ip net.IP) (string, error) {
 func IPStringToByteString(s string) (string, error) {
 	ip := net.ParseIP(s)
 	if ip == nil {
-		return "", fmt.Errorf("Invalid IP Address %s", s)
+		return "", fmt.Errorf("Invalid IP Address %q", s)
 	}
 	return IPToByteString(ip)
 }
