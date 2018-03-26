@@ -81,7 +81,7 @@ func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 	}
 	err = cmd.Wait()
 
-	# Each line gets counted twice in the scanner.Scan for loop
+	// Each line gets counted twice in the scanner.Scan for loop
 	return lines / 2, err
 }
 func (b NFDUMPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
