@@ -5,7 +5,20 @@ go:
   - "1.10"
   - tip
 
+cache:
+  directories:
+  - $HOME/.sources
+
 addons:
   apt:
     packages:
-      - nfdump
+      - flex
+      - bison
+      - libbz2-dev
+      - liblzo2-dev
+
+before_install:
+  - ./.ci/install-nfdump.sh
+
+before_script:
+  - export PATH=$PATH:$HOME/local/bin
