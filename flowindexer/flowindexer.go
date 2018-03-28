@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -410,6 +411,9 @@ func (i *Indexer) Dump(query string, writer io.Writer) error {
 		}
 		if err != nil {
 			log.Printf("Error dumping %q: %q", fn, err)
+			if isBrokenPipe(err) {
+				return err
+			}
 		}
 	}
 	return err
@@ -459,4 +463,10 @@ func RunDaemon(config string) {
 		time.Sleep(5 * time.Second)
 	}
 
+}
+
+//isBrokenPipe determines if an error was a broken pipe or connection reset error
+//This is really the wrong way to do this, but the right way was not working either.
+func isBrokenPipe(err error) bool {
+	return strings.Contains(err.Error(), "broken pipe") || strings.Contains(err.Error(), "connection")
 }
