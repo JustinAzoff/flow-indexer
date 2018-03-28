@@ -1,6 +1,7 @@
 package flowindexer
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 	"runtime"
@@ -20,6 +21,11 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 		//log.Printf("%s Already indexed\n", filename)
 		return nil
 	}
+
+	if err = b.Check(); err != nil {
+		return fmt.Errorf("Backend is not usable: %v", err)
+	}
+
 	ips := ipset.New()
 	reader, err := backend.OpenDecompress(filename)
 	if err != nil {

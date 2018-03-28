@@ -56,6 +56,10 @@ func (b BroBackend) Filter(reader io.Reader, query string, writer io.Writer) err
 	return nil
 }
 
+func (b BroBackend) Check() error {
+	return nil
+}
+
 func init() {
 	RegisterBackend("bro", BroBackend{})
 }

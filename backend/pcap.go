@@ -64,6 +64,10 @@ func (b PCAPBackend) Filter(reader io.Reader, query string, writer io.Writer) er
 	return err
 }
 
+func (b PCAPBackend) Check() error {
+	return nil
+}
+
 func init() {
 	RegisterBackend("pcap", PCAPBackend{})
 }

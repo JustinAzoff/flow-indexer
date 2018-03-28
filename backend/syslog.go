@@ -77,6 +77,9 @@ func (b SyslogBackend) Filter(reader io.Reader, query string, writer io.Writer) 
 	}
 	return nil
 }
+func (b SyslogBackend) Check() error {
+	return nil
+}
 
 func init() {
 	RegisterBackend("syslog", SyslogBackend{})

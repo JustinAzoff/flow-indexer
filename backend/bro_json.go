@@ -78,6 +78,9 @@ func (b BroJSONBackend) Filter(reader io.Reader, query string, writer io.Writer)
 	}
 	return nil
 }
+func (b BroJSONBackend) Check() error {
+	return nil
+}
 
 func init() {
 	RegisterBackend("bro_json", BroJSONBackend{})

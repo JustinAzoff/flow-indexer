@@ -50,7 +50,19 @@ func (b NFDUMPCSVBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, 
 	return lines, err
 }
 func (b NFDUMPCSVBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	return nil
+	filter := fmt.Sprintf("ip in [%s]", query)
+	cmd := exec.Command("nfdump", "-qr", "-", filter)
+	cmd.Stdin = reader
+	cmd.Stdout = writer
+
+	err := cmd.Run()
+	return err
+}
+
+func (b NFDUMPCSVBackend) Check() error {
+	cmd := exec.Command("nfdump", "-V")
+	_, err := cmd.CombinedOutput()
+	return err
 }
 
 type NFDUMPBackend struct {
@@ -92,6 +104,12 @@ func (b NFDUMPBackend) Filter(reader io.Reader, query string, writer io.Writer) 
 	cmd.Stdout = writer
 
 	err := cmd.Run()
+	return err
+}
+
+func (b NFDUMPBackend) Check() error {
+	cmd := exec.Command("nfdump", "-V")
+	_, err := cmd.CombinedOutput()
 	return err
 }
 

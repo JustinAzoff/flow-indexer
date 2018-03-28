@@ -235,7 +235,9 @@ func (i *Indexer) IndexAll() error {
 		//Assume the last file in the list is the most recent one
 		//and check to see if it is still growing before indexing it
 		checkGrowing := idx == len(logs)-1
-		i.IndexOne(l, checkGrowing)
+		if err = i.IndexOne(l, checkGrowing); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -252,7 +254,9 @@ func (i *Indexer) IndexRecent() error {
 		//Assume the last file in the list is the most recent one
 		//and check to see if it is still growing before indexing it
 		checkGrowing := idx == len(logs)-1
-		i.IndexOne(l, checkGrowing)
+		if err = i.IndexOne(l, checkGrowing); err != nil {
+			return err
+		}
 	}
 
 	return nil
