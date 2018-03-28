@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os/exec"
 	"strings"
@@ -85,7 +86,13 @@ func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 	return lines / 2, err
 }
 func (b NFDUMPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
-	return nil
+	filter := fmt.Sprintf("ip in [%s]", query)
+	cmd := exec.Command("nfdump", "-qr", "-", filter)
+	cmd.Stdin = reader
+	cmd.Stdout = writer
+
+	err := cmd.Run()
+	return err
 }
 
 func init() {
