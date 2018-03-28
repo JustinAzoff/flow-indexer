@@ -1,0 +1,56 @@
+project_name: flow-indexer
+release:
+  github:
+    owner: JustinAzoff
+    name: flow-indexer
+  name_template: '{{.Tag}}'
+builds:
+- goos:
+  - linux
+  - darwin
+  goarch:
+  - amd64
+  goarm:
+  - "6"
+  main: .
+  ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+  binary: flow-indexer
+archive:
+  wrap_in_directory: true
+  format: tar.gz
+  name_template: '{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{
+    .Arm }}{{ end }}'
+  files:
+  - licence*
+  - LICENCE*
+  - license*
+  - LICENSE*
+  - readme*
+  - README*
+  - changelog*
+  - CHANGELOG*
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+nfpm:
+  description:  Flow-Indexer indexes flows found in chunked log files from bro,nfdump,syslog, or pcap files 
+  license: MIT
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  bindir: /usr/bin
+  homepage: https://github.com/justinazoff/flow-indexer
+  maintainer: Justin Azoff <justin.azoff@gmail.com>
+  formats:
+    - deb
+    - rpm
+sign:
+  cmd: gpg
+  args:
+  - --output
+  - $signature
+  - --detach-sig
+  - $artifact
+  signature: ${artifact}.sig
+  artifacts: checksum
+env_files:
+  github_token: ~/.config/goreleaser/github_token
