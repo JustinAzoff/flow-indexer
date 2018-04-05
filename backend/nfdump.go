@@ -14,7 +14,7 @@ type NFDUMPCSVBackend struct {
 }
 
 func (b NFDUMPCSVBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
-	cmd := exec.Command("nfdump", "-qr", "-", "-o", "csv")
+	cmd := exec.Command("nfdump", "-qr", "-", "-o", "csv6")
 	cmd.Stdin = reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
