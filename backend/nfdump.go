@@ -69,7 +69,7 @@ type NFDUMPBackend struct {
 }
 
 func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
-	cmd := exec.Command("nfdump", "-qr", "-", "-o", "fmt:%sa %da")
+	cmd := exec.Command("nfdump", "-qr", "-", "-o", "fmt:%sa %da", "-6")
 	cmd.Stdin = reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
