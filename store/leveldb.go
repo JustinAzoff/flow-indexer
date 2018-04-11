@@ -27,7 +27,6 @@ func NewLevelDBStore(filename string) (IpStore, error) {
 	//Options taken from ledisdb
 	opts := &opt.Options{}
 	opts.BlockSize = 32768
-	opts.WriteBuffer = 67108864
 	opts.BlockCacheCapacity = 524288000
 	opts.OpenFilesCacheCapacity = 1024
 	opts.CompactionTableSize = 32 * 1024 * 1024
