@@ -64,6 +64,7 @@ It will do this in a 60 second loop to keep itself up to date.
 ## Query API
 
     $ curl -s 'localhost:8080/search?i=conn&q=1.2.3.0/24'
+    $ curl -s 'localhost:8080/dump?i=conn&q=1.2.3.0/24'
     $ curl -s 'localhost:8080/stats?i=conn&q=1.2.3.0/24'
 
 ## Service Configuration
