@@ -21,6 +21,7 @@ require (
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20180128140416-211f78098806
 	github.com/tinylib/msgp v1.0.2
+	github.com/ulikunitz/xz v0.5.5
 	github.com/willf/bitset v1.1.9
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
 	google.golang.org/appengine v1.0.0 // indirect

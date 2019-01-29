@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	gzip "github.com/klauspost/pgzip"
+	"github.com/ulikunitz/xz"
 )
 
 //PipedDecompressor not used right now, but may come in handy
@@ -74,6 +75,15 @@ func OpenDecompress(fn string) (r io.ReadCloser, err error) {
 		bzr := bzip2.NewReader(f)
 		return &WrappedDecompressor{
 			ReadCloser: ioutil.NopCloser(bzr),
+			wrapped:    f,
+		}, nil
+	case ".xz":
+		xzr, err := xz.NewReader(f)
+		if err != nil {
+			return nil, err
+		}
+		return &WrappedDecompressor{
+			ReadCloser: ioutil.NopCloser(xzr),
 			wrapped:    f,
 		}, nil
 	default:
