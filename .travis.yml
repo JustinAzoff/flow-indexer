@@ -16,6 +16,7 @@ addons:
       - bison
       - libbz2-dev
       - liblzo2-dev
+      - argus-client
 
 before_install:
   - ./.ci/install-nfdump.sh
