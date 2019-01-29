@@ -3,6 +3,7 @@ module github.com/JustinAzoff/flow-indexer
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/golang/snappy v0.0.0-20170215233205-553a64147049 // indirect
+	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/gopacket v1.1.15
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
@@ -11,7 +12,6 @@ require (
 	github.com/klauspost/crc32 v0.0.0-20161016154125-cb6bfca970f6 // indirect
 	github.com/klauspost/pgzip v0.0.0-20170402124221-0bf5dcad4ada
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/kr/pty v1.1.3 // indirect
 	github.com/mdlayher/raw v0.0.0-20181016155347-fa5ef3332ca9 // indirect
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
