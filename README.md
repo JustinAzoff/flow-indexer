@@ -110,6 +110,9 @@ flowindexer hard nofile 65535
 Lower level commands example
 ============================
 
+Not really used anymore in practice, the daemon is the recommended way to use flow-indexer.
+But these commands can be useful for testing and development.
+
 Index flows
 -----------
 
