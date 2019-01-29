@@ -16,10 +16,10 @@ addons:
       - bison
       - libbz2-dev
       - liblzo2-dev
-      - argus-client
 
 before_install:
   - ./.ci/install-nfdump.sh
+  - ./.ci/install-argus.sh
 
 before_script:
   - export PATH=$PATH:$HOME/local/bin
