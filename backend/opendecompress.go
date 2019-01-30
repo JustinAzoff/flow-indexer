@@ -9,19 +9,18 @@ import (
 	"path/filepath"
 
 	gzip "github.com/klauspost/pgzip"
-	"github.com/ulikunitz/xz"
 )
 
-//PipedDecompressor not used right now, but may come in handy
+//PipedDecompressor is used to wrap higher performing native decompression tools
 type PipedDecompressor struct {
 	io.ReadCloser
 	wrapped io.ReadCloser
 	cmd     *exec.Cmd
 }
 
-func NewPipedDecompressor(f *os.File, prog string) (*PipedDecompressor, error) {
+func NewPipedDecompressor(r io.ReadCloser, prog string) (*PipedDecompressor, error) {
 	cmd := exec.Command(prog)
-	cmd.Stdin = f
+	cmd.Stdin = r
 	out, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, err
@@ -31,7 +30,7 @@ func NewPipedDecompressor(f *os.File, prog string) (*PipedDecompressor, error) {
 	}
 	pd := &PipedDecompressor{
 		ReadCloser: out,
-		wrapped:    f,
+		wrapped:    r,
 		cmd:        cmd,
 	}
 	return pd, err
@@ -78,14 +77,8 @@ func OpenDecompress(fn string) (r io.ReadCloser, err error) {
 			wrapped:    f,
 		}, nil
 	case ".xz":
-		xzr, err := xz.NewReader(f)
-		if err != nil {
-			return nil, err
-		}
-		return &WrappedDecompressor{
-			ReadCloser: ioutil.NopCloser(xzr),
-			wrapped:    f,
-		}, nil
+		xzr, err := NewPipedDecompressor(f, "xzcat")
+		return xzr, err
 	default:
 		return f, err
 	}
