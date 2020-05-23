@@ -1,5 +1,7 @@
 module github.com/JustinAzoff/flow-indexer
 
+go 1.14
+
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/golang/snappy v0.0.0-20170215233205-553a64147049 // indirect
