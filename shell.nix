@@ -2,9 +2,10 @@ let
   pkgs = import <nixpkgs> {};
 in
 pkgs.mkShell {
-  buildInputs = [
-    pkgs.go
-    pkgs.nfdump
-    pkgs.argus pkgs.argus-clients
+  buildInputs = with pkgs;[
+    go
+    #For testing
+    nfdump
+    argus argus-clients
   ];
 }
