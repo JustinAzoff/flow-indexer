@@ -10,6 +10,7 @@ import (
 	"github.com/JustinAzoff/flow-indexer/backend"
 	"github.com/JustinAzoff/flow-indexer/ipset"
 	"github.com/JustinAzoff/flow-indexer/store"
+	opendecompress "github.com/JustinAzoff/go-opendecompress"
 )
 
 func Index(s store.IpStore, b backend.Backend, filename string) error {
@@ -27,7 +28,7 @@ func Index(s store.IpStore, b backend.Backend, filename string) error {
 	}
 
 	ips := ipset.New()
-	reader, err := backend.OpenDecompress(filename)
+	reader, err := opendecompress.Open(filename)
 	if err != nil {
 		return err
 	}

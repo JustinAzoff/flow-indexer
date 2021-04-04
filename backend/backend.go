@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/JustinAzoff/flow-indexer/ipset"
+	opendecompress "github.com/JustinAzoff/go-opendecompress"
 )
 
 const maxLineLength = 20 * 1024 * 1024
@@ -29,7 +30,7 @@ func NewBackend(backendType string) Backend {
 }
 
 func ExtractIps(backend string, filename string) (*ipset.Set, error) {
-	reader, err := OpenDecompress(filename)
+	reader, err := opendecompress.Open(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func ExtractIpsReader(backend string, reader io.Reader) (*ipset.Set, error) {
 }
 
 func FilterIPs(backend string, filename string, query string, writer io.Writer) error {
-	reader, err := OpenDecompress(filename)
+	reader, err := opendecompress.Open(filename)
 	if err != nil {
 		return err
 	}
