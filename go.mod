@@ -6,12 +6,10 @@ require (
 	github.com/JustinAzoff/go-opendecompress v0.0.0-20210404020920-ed787af23844
 	github.com/boltdb/bolt v1.3.1
 	github.com/golang/snappy v0.0.0-20170215233205-553a64147049 // indirect
-	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/gopacket v1.1.19
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/mdlayher/raw v0.0.0-20181016155347-fa5ef3332ca9 // indirect
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
