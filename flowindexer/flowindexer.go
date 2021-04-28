@@ -301,7 +301,7 @@ func (i *Indexer) RefreshStores() error {
 		}
 	}
 	//Now, see if any of our databases no longer exist on disk
-	newStores := i.stores[:0]
+	var newStores []store.IpStore
 	for _, s := range i.stores {
 		if seenDatabases[s.Filename()] {
 			newStores = append(newStores, s)
