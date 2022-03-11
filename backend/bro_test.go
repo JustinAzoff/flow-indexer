@@ -25,6 +25,21 @@ func TestBroExtractIps(t *testing.T) {
 	t.Logf("%v\n", ips.Count())
 }
 
+func TestBroExtractIpsExtended(t *testing.T) {
+	ips, err := ExtractIps("bro", "test_data/bro_conn_extended.log")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ips.Count() != 2 {
+		t.Errorf("BroBackend.ExtractIps count => %#v, want %#v", ips.Count(), 2)
+	}
+	for _, ip := range ips.SortedStrings() {
+		t.Logf("%x\n", ip)
+	}
+
+	t.Logf("%v\n", ips.Count())
+}
+
 var testRandomASCIIBroLogBytes []byte
 
 func init() {
