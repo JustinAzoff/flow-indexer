@@ -10,11 +10,20 @@ import (
 	"github.com/JustinAzoff/flow-indexer/ipset"
 )
 
+type hasName interface {
+	Name() string
+}
+
 type NFDUMPCSVBackend struct {
 }
 
 func (b NFDUMPCSVBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
-	cmd := exec.Command("nfdump", "-qr", "-", "-o", "csv6")
+	f, ok := reader.(hasName)
+	if !ok {
+		return 0, fmt.Errorf("Could not identify filename for reader")
+	}
+	fname := f.Name()
+	cmd := exec.Command("nfdump", "-qr", fname, "-o", "csv6")
 	cmd.Stdin = reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -50,8 +59,13 @@ func (b NFDUMPCSVBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, 
 	return lines, err
 }
 func (b NFDUMPCSVBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
+	f, ok := reader.(hasName)
+	if !ok {
+		return fmt.Errorf("Could not identify filename from reader")
+	}
+	fname := f.Name()
 	filter := fmt.Sprintf("ip in [%s]", query)
-	cmd := exec.Command("nfdump", "-qr", "-", filter)
+	cmd := exec.Command("nfdump", "-qr", fname, filter)
 	cmd.Stdin = reader
 	cmd.Stdout = writer
 
@@ -69,7 +83,12 @@ type NFDUMPBackend struct {
 }
 
 func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, error) {
-	cmd := exec.Command("nfdump", "-qr", "-", "-o", "fmt:%sa %da", "-6")
+	f, ok := reader.(hasName)
+	if !ok {
+		return 0, fmt.Errorf("Could not identify filename from reader")
+	}
+	fname := f.Name()
+	cmd := exec.Command("nfdump", "-qr", fname, "-o", "fmt:%sa %da", "-6")
 	cmd.Stdin = reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -98,8 +117,13 @@ func (b NFDUMPBackend) ExtractIps(reader io.Reader, ips *ipset.Set) (uint64, err
 	return lines / 2, err
 }
 func (b NFDUMPBackend) Filter(reader io.Reader, query string, writer io.Writer) error {
+	f, ok := reader.(hasName)
+	if !ok {
+		return fmt.Errorf("Could not identify filename from reader")
+	}
+	fname := f.Name()
 	filter := fmt.Sprintf("ip in [%s]", query)
-	cmd := exec.Command("nfdump", "-qr", "-", filter)
+	cmd := exec.Command("nfdump", "-qr", fname, filter)
 	cmd.Stdin = reader
 	cmd.Stdout = writer
 
